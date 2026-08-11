@@ -3,23 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-"use client";
-
 import React, { useState, useMemo } from 'react';
-import { Photo, Photographer, ViewMode } from '../types';
-import { INITIAL_PHOTOS, MOCK_PHOTOGRAPHERS, CURRENT_USER } from '../data/mockData';
-import { Navbar } from '../components/Navbar';
-import { Sidebar } from '../components/Sidebar';
-import { PhotoGrid } from '../components/PhotoGrid';
-import { PhotoCard } from '../components/PhotoCard';
-import { PhotoDetailModal } from '../components/PhotoDetailModal';
-import { ProfilePage } from '../components/ProfilePage';
-import { UploadPage } from '../components/UploadPage';
-import { DesignSpecView } from '../components/DesignSpecView';
-import { SettingsView } from '../components/SettingsView';
-import { Film, Camera, BookOpen, X, Image as ImageIcon } from 'lucide-react';
+import { Photo, Photographer, ViewMode } from './types';
+import { INITIAL_PHOTOS, MOCK_PHOTOGRAPHERS, CURRENT_USER } from './data/mockData';
+import { Navbar } from './components/Navbar';
+import { Sidebar } from './components/Sidebar';
+import { PhotoGrid } from './components/PhotoGrid';
+import { PhotoDetailModal } from './components/PhotoDetailModal';
+import { ProfilePage } from './components/ProfilePage';
+import { UploadPage } from './components/UploadPage';
+import { DesignSpecView } from './components/DesignSpecView';
+import { Film, Camera, Sparkles, BookOpen, Compass, Heart, ArrowRight } from 'lucide-react';
 
-export default function Home() {
+export default function App() {
   const [photos, setPhotos] = useState<Photo[]>(INITIAL_PHOTOS);
   const [photographers, setPhotographers] = useState<Photographer[]>(MOCK_PHOTOGRAPHERS);
   const [currentView, setCurrentView] = useState<ViewMode>('feed');
@@ -32,7 +28,6 @@ export default function Home() {
   
   // Modals
   const [activePhotoDetail, setActivePhotoDetail] = useState<Photo | null>(null);
-  const [showBanner, setShowBanner] = useState<boolean>(true);
 
   // Filtered Photos List
   const filteredPhotos = useMemo(() => {
@@ -186,13 +181,6 @@ export default function Home() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleViewChange = (view: ViewMode) => {
-    if (view === 'profile') {
-      setSelectedPhotographerId(CURRENT_USER.id);
-    }
-    setCurrentView(view);
-  };
-
   // Currently viewed photographer object
   const activePhotographer =
     photographers.find((p) => p.id === selectedPhotographerId) || CURRENT_USER;
@@ -203,7 +191,7 @@ export default function Home() {
       {/* Top Header Navbar */}
       <Navbar
         currentView={currentView}
-        onViewChange={handleViewChange}
+        onViewChange={setCurrentView}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onOpenUpload={() => setCurrentView('upload')}
@@ -216,54 +204,51 @@ export default function Home() {
         {/* Left Sidebar for PC/Tablet (Thin by default, expands on hover) */}
         <Sidebar
           currentView={currentView}
-          onViewChange={handleViewChange}
+          onViewChange={setCurrentView}
           userAvatar={CURRENT_USER.avatar}
           userName={CURRENT_USER.name}
         />
 
         {/* Main Content Area */}
-        <main className="flex-1 min-w-0 w-full px-4 sm:px-8 lg:px-12 py-6 pb-24 md:pb-12">
+        <main className="flex-1 min-w-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-12">
         
         {/* Feed View */}
         {currentView === 'feed' && (
           <div className="space-y-6">
             
-            {/* Hero Section Banner Notification */}
-            {showBanner && (
-              <div className="bg-[#622B14] text-[#E4D6A9] p-6 sm:p-8 sm:px-12 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6 -mx-4 sm:-mx-8 lg:-mx-12 -mt-6 mb-6">
-                <button 
-                  onClick={() => setShowBanner(false)}
-                  className="absolute top-4 right-4 p-1 text-[#E4D6A9]/70 hover:text-[#E4D6A9] transition-colors"
-                  aria-label="Tutup notifikasi"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-                <div className="space-y-2 max-w-2xl">
-                  <div className="flex items-center gap-2 text-[10px] text-[#E4D6A9] font-mono tracking-widest uppercase font-semibold">
-                    <Film className="w-3.5 h-3.5" />
-                    <span>Komunitas Galeri Foto Analog & Film</span>
-                  </div>
-                  <h1 className="font-serif-display text-xl sm:text-2xl font-bold leading-tight pr-8">
-                    "Pholet" — Mengabadikan Foto Yang Pernah Terlupakan
-                  </h1>
-                  <p className="text-xs sm:text-sm text-[#E4D6A9]/90 leading-relaxed font-sans">
-                    Saling memamerkan karya foto analog, berbagi catatan rol film (Portra, Gold, Cinestill), spesifikasi EXIF kamera, dan apresiasi antar fotografer.
-                  </p>
+            {/* Hero Section Banner */}
+            <div className="bg-[#622B14] text-[#E4D6A9] rounded-2xl p-6 sm:p-8 border border-[#995F2F]/40 shadow-md relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div className="space-y-2 max-w-2xl">
+                <div className="flex items-center gap-2 text-[10px] text-[#E4D6A9] font-mono tracking-widest uppercase font-semibold">
+                  <Film className="w-3.5 h-3.5" />
+                  <span>Komunitas Galeri Foto Analog & Film</span>
                 </div>
-
-                <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
-                  <button
-                    onClick={() => setCurrentView('upload')}
-                    className="px-5 py-2.5 bg-[#E4D6A9] text-[#622B14] font-semibold text-xs rounded-full hover:bg-[#f3e8c9] transition-all shadow-sm flex items-center justify-center gap-2"
-                  >
-                    <Camera className="w-4 h-4" />
-                    <span>Upload Foto</span>
-                  </button>
-
-
-                </div>
+                <h1 className="font-serif-display text-2xl sm:text-3xl font-bold leading-tight">
+                  "Pholet" — Mengabadikan Foto Yang Pernah Terlupakan
+                </h1>
+                <p className="text-xs sm:text-sm text-[#E4D6A9]/90 leading-relaxed font-sans">
+                  Saling memamerkan karya foto analog, berbagi catatan rol film (Portra, Gold, Cinestill), spesifikasi EXIF kamera, dan apresiasi antar fotografer.
+                </p>
               </div>
-            )}
+
+              <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto shrink-0">
+                <button
+                  onClick={() => setCurrentView('upload')}
+                  className="px-5 py-2.5 bg-[#E4D6A9] text-[#622B14] font-semibold text-xs rounded-full hover:bg-[#f3e8c9] transition-all shadow-sm flex items-center justify-center gap-2"
+                >
+                  <Camera className="w-4 h-4" />
+                  <span>Upload Foto</span>
+                </button>
+
+                <button
+                  onClick={() => setCurrentView('design-spec')}
+                  className="px-4 py-2.5 bg-[#995F2F]/40 border border-[#E4D6A9]/30 text-[#E4D6A9] font-medium text-xs rounded-full hover:bg-[#995F2F] transition-all flex items-center justify-center gap-1.5"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span>Lihat Panduan UI/UX</span>
+                </button>
+              </div>
+            </div>
 
             {/* Masonry Photo Grid */}
             <PhotoGrid
@@ -295,52 +280,9 @@ export default function Home() {
           />
         )}
 
-
-
-        {/* My Albums View */}
-        {currentView === 'my-albums' && (
-          <div className="flex flex-col items-center justify-center py-32 text-[#622B14] space-y-4">
-            <div className="w-16 h-16 bg-[#E4D6A9] rounded-full flex items-center justify-center shadow-inner">
-              <Film className="w-8 h-8" />
-            </div>
-            <h2 className="font-serif-display text-2xl font-bold">Album Saya</h2>
-            <p className="text-[#978F66] text-sm max-w-md text-center">
-              Fitur album sedang dalam pengembangan. Nantinya Anda bisa mengelompokkan foto-foto roll film Anda di sini.
-            </p>
-          </div>
-        )}
-
-        {/* My Photos View */}
-        {currentView === 'my-photos' && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 border-b border-[#978F66]/30 pb-4 mb-6">
-              <div className="w-10 h-10 bg-[#E4D6A9] rounded-full flex items-center justify-center border border-[#978F66]/30">
-                <ImageIcon className="w-5 h-5 text-[#995F2F]" />
-              </div>
-              <div>
-                <h2 className="font-serif-display text-2xl font-bold text-[#622B14]">Foto Saya</h2>
-                <p className="text-xs text-[#978F66]">Koleksi semua foto yang telah Anda unggah</p>
-              </div>
-            </div>
-            
-            {photos.filter(p => p.photographerId === CURRENT_USER.id).length === 0 ? (
-               <div className="bg-[#F8F4E8] border border-[#978F66]/30 rounded-2xl p-12 text-center space-y-3 my-8">
-                 <p className="text-sm text-[#978F66]">Anda belum mengunggah foto satupun.</p>
-               </div>
-            ) : (
-               <PhotoGrid
-                 photos={filteredPhotos.filter(p => p.photographerId === CURRENT_USER.id)}
-                 selectedCategory={selectedCategory}
-                 onCategorySelect={setSelectedCategory}
-                 selectedFilmStock={selectedFilmStock}
-                 onFilmStockSelect={setSelectedFilmStock}
-                 onLikeToggle={handleLikeToggle}
-                 onBookmarkToggle={handleBookmarkToggle}
-                 onClickPhoto={(photo) => setActivePhotoDetail(photo)}
-                 onClickPhotographer={handleSelectPhotographer}
-               />
-            )}
-          </div>
+        {/* UI/UX Design System Specification View */}
+        {currentView === 'design-spec' && (
+          <DesignSpecView />
         )}
 
         {/* Upload Page View */}
@@ -350,11 +292,6 @@ export default function Home() {
             onUploadSuccess={handleUploadSuccess}
             currentUser={CURRENT_USER}
           />
-        )}
-
-        {/* Settings View */}
-        {currentView === 'settings' && (
-          <SettingsView />
         )}
 
       </main>
@@ -381,6 +318,8 @@ export default function Home() {
             <button onClick={() => setCurrentView('feed')} className="hover:text-[#E4D6A9]">Galeri Feed</button>
             <span>•</span>
             <button onClick={() => handleSelectPhotographer('user-me')} className="hover:text-[#E4D6A9]">Portofolio Saya</button>
+            <span>•</span>
+            <button onClick={() => setCurrentView('design-spec')} className="hover:text-[#E4D6A9]">Desain & Spec UI/UX</button>
           </div>
 
           <p className="text-[10px] text-[#978F66]">

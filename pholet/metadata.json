@@ -1,0 +1,6 @@
+{
+  "name": "Pholet",
+  "description": "Community photo gallery platform for forgotten moments and film photography.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
