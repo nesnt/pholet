@@ -39,10 +39,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     <div className="space-y-6">
       
       {/* Profile Header Container - Full Screen Width */}
-      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#F8F4E8] border-y border-[#978F66]/30 shadow-sm -mt-6 mb-8">
+      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#082032] border-y border-[#334756]/30 shadow-sm -mt-6 mb-8">
         
         {/* Banner Cover with Smooth Gradient to #F8F4E8 */}
-        <div className="h-48 sm:h-64 lg:h-72 w-full relative bg-[#21120B]">
+        <div className="h-48 sm:h-64 lg:h-72 w-full relative bg-[#082032]">
           <img
             src={photographer.bannerUrl}
             alt="Banner"
@@ -62,19 +62,19 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <img
                 src={photographer.avatar}
                 alt={photographer.name}
-                className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover border-4 border-[#F8F4E8] shadow-lg bg-[#E4D6A9]"
+                className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover border-4 border-[#F8F4E8] shadow-lg bg-[#2C394B]"
               />
               <div className="mb-1">
-                <h1 className="font-serif-display text-xl sm:text-2xl font-bold text-[#622B14]">
+                <h1 className="font-serif-display text-xl sm:text-2xl font-bold text-white">
                   {photographer.name}
                 </h1>
-                <p className="text-xs text-[#995F2F] font-medium">
+                <p className="text-xs text-white font-medium">
                   {photographer.handle}
                 </p>
-                <div className="flex items-center gap-3 text-xs text-[#978F66] mt-1 flex-wrap">
+                <div className="flex items-center gap-3 text-xs text-gray-400 mt-1 flex-wrap">
                   {photographer.location && (
                     <span className="flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-[#995F2F]" />
+                      <MapPin className="w-3.5 h-3.5 text-[#FF4C29]" />
                       {photographer.location}
                     </span>
                   )}
@@ -83,9 +83,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                       href={photographer.website}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center gap-1 hover:text-[#622B14] hover:underline"
+                      className="flex items-center gap-1 hover:text-white hover:underline"
                     >
-                      <Globe className="w-3.5 h-3.5 text-[#995F2F]" />
+                      <Globe className="w-3.5 h-3.5 text-[#FF4C29]" />
                       <span>{photographer.website.replace('https://', '')}</span>
                     </a>
                   )}
@@ -100,27 +100,27 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                   onClick={() => onToggleFollow(photographer.id)}
                   className={`px-5 py-2 rounded-full text-xs font-semibold flex items-center gap-2 transition-all shadow-sm ${
                     photographer.isFollowing
-                      ? 'bg-[#E4D6A9] text-[#622B14] border border-[#978F66]/40 hover:bg-rose-100 hover:text-rose-700'
-                      : 'bg-[#622B14] text-[#E4D6A9] hover:bg-[#995F2F]'
+                      ? 'bg-[#2C394B] text-white border border-[#334756]/40 hover:bg-rose-100 hover:text-rose-700'
+                      : 'bg-[#FF4C29] text-white hover:bg-[#334756]'
                   }`}
                 >
                   {photographer.isFollowing ? (
                     <>
-                      <UserCheck className="w-4 h-4" />
+                      <UserCheck className="w-4 h-4 text-[#FF4C29]" />
                       <span>Mengikuti</span>
                     </>
                   ) : (
                     <>
-                      <UserPlus className="w-4 h-4" />
+                      <UserPlus className="w-4 h-4 text-[#FF4C29]" />
                       <span>Ikuti Fotografer</span>
                     </>
                   )}
                 </button>
               ) : (
                 <button
-                  className="px-4 py-2 bg-[#E4D6A9]/80 border border-[#978F66]/40 text-[#622B14] rounded-full text-xs font-semibold flex items-center gap-1.5 hover:bg-[#E4D6A9]"
+                  className="px-4 py-2 bg-[#2C394B]/80 border border-[#334756]/40 text-white rounded-full text-xs font-semibold flex items-center gap-1.5 hover:bg-[#2C394B]"
                 >
-                  <Edit3 className="w-3.5 h-3.5" />
+                  <Edit3 className="w-3.5 h-3.5 text-[#FF4C29]" />
                   <span>Edit Portofolio</span>
                 </button>
               )}
@@ -129,29 +129,29 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           </div>
 
           {/* Bio text */}
-          <p className="text-xs sm:text-sm text-[#21120B]/90 max-w-2xl leading-relaxed mb-5">
+          <p className="text-xs sm:text-sm text-gray-100/90 max-w-2xl leading-relaxed mb-5">
             {photographer.bio}
           </p>
 
           {/* Statistics Strip */}
-          <div className="flex items-center gap-6 py-3 px-4 bg-[#E4D6A9]/40 border border-[#978F66]/30 rounded-xl mb-5 text-xs text-[#622B14] flex-wrap">
+          <div className="flex items-center gap-6 py-3 px-4 bg-[#2C394B]/40 border border-[#334756]/30 rounded-xl mb-5 text-xs text-white flex-wrap">
             <div>
               <span className="font-bold text-sm block">{myPhotos.length}</span>
-              <span className="text-[10px] text-[#978F66] uppercase tracking-wider font-semibold">
+              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">
                 Karya Foto
               </span>
             </div>
             <div className="w-px h-8 bg-[#978F66]/30" />
             <div>
               <span className="font-bold text-sm block">{photographer.followersCount}</span>
-              <span className="text-[10px] text-[#978F66] uppercase tracking-wider font-semibold">
+              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">
                 Pengikut
               </span>
             </div>
             <div className="w-px h-8 bg-[#978F66]/30" />
             <div>
               <span className="font-bold text-sm block">{photographer.followingCount}</span>
-              <span className="text-[10px] text-[#978F66] uppercase tracking-wider font-semibold">
+              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">
                 Mengikuti
               </span>
             </div>
@@ -160,7 +160,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <span className="font-bold text-sm block">
                 {myPhotos.reduce((acc, p) => acc + p.likesCount, 0)}
               </span>
-              <span className="text-[10px] text-[#978F66] uppercase tracking-wider font-semibold">
+              <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">
                 Total Suka
               </span>
             </div>
@@ -168,17 +168,17 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
           {/* Film Gear List */}
           <div className="space-y-2">
-            <h4 className="text-xs font-semibold text-[#622B14] flex items-center gap-1.5">
-              <Camera className="w-4 h-4 text-[#995F2F]" />
+            <h4 className="text-xs font-semibold text-white flex items-center gap-1.5">
+              <Camera className="w-4 h-4 text-[#FF4C29]" />
               <span>Perlengkapan Kamera & Rol Film Favorit:</span>
             </h4>
             <div className="flex flex-wrap gap-1.5">
               {photographer.filmGear.map((gear) => (
                 <span
                   key={gear}
-                  className="bg-[#F8F4E8] text-[#622B14] border border-[#978F66]/40 text-[11px] font-mono px-3 py-1 rounded-md flex items-center gap-1 shadow-2xs"
+                  className="bg-[#082032] text-white border border-[#334756]/40 text-[11px] font-mono px-3 py-1 rounded-md flex items-center gap-1 shadow-2xs"
                 >
-                  <Film className="w-3 h-3 text-[#995F2F]" />
+                  <Film className="w-3 h-3 text-[#FF4C29]" />
                   {gear}
                 </span>
               ))}
@@ -190,16 +190,16 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       </div>
 
       {/* Tabs Filter (Photos vs Liked vs Bookmarked) */}
-      <div className="flex items-center gap-2 border-b border-[#978F66]/30 pb-2">
+      <div className="flex items-center gap-2 border-b border-[#334756]/30 pb-2">
         <button
           onClick={() => setActiveTab('photos')}
           className={`px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2 transition-colors ${
             activeTab === 'photos'
-              ? 'bg-[#622B14] text-[#E4D6A9]'
-              : 'text-[#622B14] hover:bg-[#E4D6A9]/50'
+              ? 'bg-[#FF4C29] text-white'
+              : 'text-white hover:bg-[#2C394B]/50'
           }`}
         >
-          <Grid className="w-4 h-4" />
+          <Grid className="w-4 h-4 text-[#FF4C29]" />
           <span>Portofolio ({myPhotos.length})</span>
         </button>
 
@@ -207,11 +207,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           onClick={() => setActiveTab('liked')}
           className={`px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2 transition-colors ${
             activeTab === 'liked'
-              ? 'bg-[#622B14] text-[#E4D6A9]'
-              : 'text-[#622B14] hover:bg-[#E4D6A9]/50'
+              ? 'bg-[#FF4C29] text-white'
+              : 'text-white hover:bg-[#2C394B]/50'
           }`}
         >
-          <Heart className="w-4 h-4" />
+          <Heart className="w-4 h-4 text-[#FF4C29]" />
           <span>Foto Disukai ({likedPhotos.length})</span>
         </button>
 
@@ -220,11 +220,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             onClick={() => setActiveTab('bookmarked')}
             className={`px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2 transition-colors ${
               activeTab === 'bookmarked'
-                ? 'bg-[#622B14] text-[#E4D6A9]'
-                : 'text-[#622B14] hover:bg-[#E4D6A9]/50'
+                ? 'bg-[#FF4C29] text-white'
+                : 'text-white hover:bg-[#2C394B]/50'
             }`}
           >
-            <Bookmark className="w-4 h-4" />
+            <Bookmark className="w-4 h-4 text-[#FF4C29]" />
             <span>Tersimpan ({bookmarkedPhotos.length})</span>
           </button>
         )}
@@ -232,7 +232,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
       {/* Photos Grid for Profile */}
       {displayedPhotos.length === 0 ? (
-        <div className="bg-[#F8F4E8] border border-[#978F66]/30 rounded-2xl p-10 text-center text-xs text-[#978F66]">
+        <div className="bg-[#082032] border border-[#334756]/30 rounded-2xl p-10 text-center text-xs text-gray-400">
           Belum ada foto dalam kategori ini.
         </div>
       ) : (

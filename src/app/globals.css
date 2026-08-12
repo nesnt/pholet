@@ -4,19 +4,19 @@
   --font-serif: var(--font-serif), Georgia, serif;
   --font-sans: var(--font-sans), system-ui, sans-serif;
 
-  --color-pholet-espresso: #622B14;
-  --color-pholet-terracotta: #995F2F;
-  --color-pholet-khaki: #978F66;
-  --color-pholet-cream: #E4D6A9;
-  --color-pholet-parchment: #F8F4E8;
-  --color-pholet-ink: #21120B;
+  --color-pholet-espresso: #082032;
+  --color-pholet-terracotta: #2C394B;
+  --color-pholet-khaki: #334756;
+  --color-pholet-cream: #2C394B;
+  --color-pholet-parchment: #082032;
+  --color-pholet-ink: #F0F0F0;
 }
 
 @layer base {
   body {
     font-family: var(--font-sans);
-    background-color: #F8F4E8;
-    color: #21120B;
+    background-color: #082032;
+    color: #F8F9FA;
   }
 
   h1, h2, h3, h4, .font-serif-display {
@@ -26,7 +26,7 @@
 
 /* Custom Film Grain Texture */
 .film-grain {
-  background-image: radial-gradient(rgba(98, 43, 20, 0.04) 1px, transparent 0);
+  background-image: radial-gradient(rgba(255, 76, 41, 0.04) 1px, transparent 0);
   background-size: 16px 16px;
 }
 

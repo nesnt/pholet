@@ -14,6 +14,7 @@ interface PhotoGridProps {
   onBookmarkToggle: (photoId: string) => void;
   onClickPhoto: (photo: Photo) => void;
   onClickPhotographer: (photographerId: string) => void;
+  isLoading?: boolean;
 }
 
 export const PhotoGrid: React.FC<PhotoGridProps> = ({
@@ -26,6 +27,7 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({
   onBookmarkToggle,
   onClickPhoto,
   onClickPhotographer,
+  isLoading = false,
 }) => {
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('masonry');
 
@@ -42,38 +44,43 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({
     <section className="space-y-6">
       
       {/* Category Pills & Controls Header */}
-      <div className="bg-[#E4D6A9]/40 border border-[#978F66]/30 p-3 sm:p-4 rounded-2xl shadow-sm space-y-3">
+      <div className="bg-[#2C394B]/40 border border-[#334756]/30 p-3 sm:p-4 rounded-2xl shadow-sm space-y-3">
         
         {/* Top Row: Filter Categories */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none max-w-full">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => onCategorySelect(cat)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  selectedCategory === cat
-                    ? 'bg-[#622B14] text-[#E4D6A9] shadow-sm'
-                    : 'bg-[#F8F4E8] text-[#622B14] hover:bg-[#995F2F] hover:text-[#E4D6A9] border border-[#978F66]/30'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          <div className="relative w-full max-w-[calc(100%-80px)] sm:max-w-md lg:max-w-xl">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none pr-6">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => onCategorySelect(cat)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                    selectedCategory === cat
+                      ? 'bg-[#FF4C29] text-white shadow-sm'
+                      : 'bg-[#082032] text-white hover:bg-[#334756] hover:text-white border border-[#334756]/30'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+            {/* Horizontal Scroll Fade Indicator */}
+            <div className="absolute top-0 right-0 bottom-1 w-12 bg-gradient-to-l from-[#E4D6A9]/80 to-transparent pointer-events-none rounded-r-2xl" />
           </div>
 
           {/* Layout Mode Toggles */}
-          <div className="flex items-center gap-1 bg-[#F8F4E8] p-1 rounded-xl border border-[#978F66]/30">
+          <div className="flex items-center gap-1 bg-[#082032] p-1 rounded-xl border border-[#334756]/30 shrink-0">
             <button
               onClick={() => setLayoutMode('masonry')}
               className={`p-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors ${
                 layoutMode === 'masonry'
-                  ? 'bg-[#995F2F] text-[#E4D6A9]'
-                  : 'text-[#622B14] hover:bg-[#E4D6A9]/50'
+                  ? 'bg-[#334756] text-white'
+                  : 'text-white hover:bg-[#2C394B]/50'
               }`}
               title="Masonry Layout"
+              aria-label="Tampilan Masonry"
             >
-              <Columns3 className="w-4 h-4" />
+              <Columns3 className="w-4 h-4 text-[#FF4C29]" />
               <span className="hidden sm:inline text-[11px] font-medium">Masonry</span>
             </button>
 
@@ -81,26 +88,27 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({
               onClick={() => setLayoutMode('grid')}
               className={`p-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors ${
                 layoutMode === 'grid'
-                  ? 'bg-[#995F2F] text-[#E4D6A9]'
-                  : 'text-[#622B14] hover:bg-[#E4D6A9]/50'
+                  ? 'bg-[#334756] text-white'
+                  : 'text-white hover:bg-[#2C394B]/50'
               }`}
               title="Uniform Grid"
+              aria-label="Tampilan Grid Seragam"
             >
-              <Grid3X3 className="w-4 h-4" />
+              <Grid3X3 className="w-4 h-4 text-[#FF4C29]" />
               <span className="hidden sm:inline text-[11px] font-medium">Grid</span>
             </button>
           </div>
         </div>
 
         {/* Bottom Row: Film Stock Dropdown & Count Status */}
-        <div className="flex items-center justify-between pt-2 border-t border-[#978F66]/20 flex-wrap gap-2 text-xs">
+        <div className="flex items-center justify-between pt-2 border-t border-[#334756]/20 flex-wrap gap-2 text-xs">
           <div className="flex items-center gap-2">
-            <Film className="w-4 h-4 text-[#995F2F]" />
-            <span className="font-medium text-[#622B14]">Filter Rol Film:</span>
+            <Film className="w-4 h-4 text-[#FF4C29]" />
+            <span className="font-medium text-white">Filter Rol Film:</span>
             <select
               value={selectedFilmStock}
               onChange={(e) => onFilmStockSelect(e.target.value)}
-              className="bg-[#F8F4E8] border border-[#978F66]/40 rounded-lg px-2.5 py-1 text-xs text-[#622B14] font-mono focus:outline-none focus:ring-1 focus:ring-[#622B14]"
+              className="bg-[#082032] border border-[#334756]/40 rounded-lg px-2.5 py-1 text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-[#FF4C29]"
             >
               {POPULAR_FILM_STOCKS.map((stock) => (
                 <option key={stock} value={stock}>
@@ -110,23 +118,42 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({
             </select>
           </div>
 
-          <div className="text-[#978F66] font-medium">
-            Menampilkan <span className="font-semibold text-[#622B14]">{photos.length}</span> karya foto
+          <div className="text-gray-400 font-medium">
+            Menampilkan <span className="font-semibold text-white">{photos.length}</span> karya foto
           </div>
         </div>
 
       </div>
 
-      {/* Empty State */}
-      {photos.length === 0 ? (
-        <div className="bg-[#F8F4E8] border-2 border-dashed border-[#978F66]/40 rounded-2xl p-12 text-center space-y-3 my-8">
-          <div className="w-12 h-12 rounded-full bg-[#E4D6A9] text-[#622B14] flex items-center justify-center mx-auto">
-            <Filter className="w-6 h-6" />
+      {/* Loading Skeleton */}
+      {isLoading ? (
+        <div className={layoutMode === 'masonry' ? "columns-[280px] sm:columns-[320px] lg:columns-[340px] gap-4 sm:gap-6 [column-fill:_balance]" : "grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-4 sm:gap-6"}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className={`mb-4 sm:mb-6 break-inside-avoid bg-[#082032] rounded-2xl border border-[#334756]/30 overflow-hidden ${layoutMode === 'grid' ? 'aspect-square' : 'min-h-[300px]'}`}>
+              <div className="p-3 bg-[#2C394B]/30 border-b border-[#334756]/20 flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-[#2C394B]/50 animate-pulse" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3 bg-[#2C394B]/50 rounded animate-pulse w-24" />
+                  <div className="h-2 bg-[#2C394B]/50 rounded animate-pulse w-16" />
+                </div>
+              </div>
+              <div className="w-full h-48 sm:h-64 bg-[#2C394B]/20 animate-pulse" />
+              <div className="p-3 space-y-2">
+                <div className="h-3 bg-[#2C394B]/50 rounded animate-pulse w-32" />
+                <div className="h-3 bg-[#2C394B]/50 rounded animate-pulse w-24" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : photos.length === 0 ? (
+        <div className="bg-[#082032] border-2 border-dashed border-[#334756]/40 rounded-2xl p-12 text-center space-y-3 my-8">
+          <div className="w-12 h-12 rounded-full bg-[#2C394B] text-white flex items-center justify-center mx-auto">
+            <Filter className="w-6 h-6 text-[#FF4C29]" />
           </div>
-          <h3 className="font-serif-display text-lg font-bold text-[#622B14]">
+          <h3 className="font-serif-display text-lg font-bold text-white">
             Tidak Ada Foto Yang Sesuai Filter
           </h3>
-          <p className="text-xs text-[#978F66] max-w-md mx-auto">
+          <p className="text-xs text-gray-400 max-w-md mx-auto">
             Coba ubah kata kunci pencarian, atau pilih kategori dan rol film yang berbeda untuk menemukan karya foto legendaris lainnya.
           </p>
           <button
@@ -134,7 +161,7 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({
               onCategorySelect('Semua');
               onFilmStockSelect('Semua Rol Film');
             }}
-            className="px-4 py-2 bg-[#622B14] text-[#E4D6A9] text-xs font-semibold rounded-full hover:bg-[#995F2F] transition-colors"
+            className="px-4 py-2 bg-[#FF4C29] text-white text-xs font-semibold rounded-full hover:bg-[#334756] transition-colors"
           >
             Reset Semua Filter
           </button>

@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Photo, Photographer, ViewMode } from '../types';
 import { INITIAL_PHOTOS, MOCK_PHOTOGRAPHERS, CURRENT_USER } from '../data/mockData';
 import { Navbar } from '../components/Navbar';
@@ -17,9 +17,13 @@ import { ProfilePage } from '../components/ProfilePage';
 import { UploadPage } from '../components/UploadPage';
 import { DesignSpecView } from '../components/DesignSpecView';
 import { SettingsView } from '../components/SettingsView';
+import { BottomNav } from '../components/BottomNav';
+import { useToast } from '../components/Toast';
 import { Film, Camera, BookOpen, X, Image as ImageIcon } from 'lucide-react';
 
 export default function Home() {
+  const { showToast } = useToast();
+  const [isGridLoading, setIsGridLoading] = useState(false);
   const [photos, setPhotos] = useState<Photo[]>(INITIAL_PHOTOS);
   const [photographers, setPhotographers] = useState<Photographer[]>(MOCK_PHOTOGRAPHERS);
   const [currentView, setCurrentView] = useState<ViewMode>('feed');
@@ -33,6 +37,13 @@ export default function Home() {
   // Modals
   const [activePhotoDetail, setActivePhotoDetail] = useState<Photo | null>(null);
   const [showBanner, setShowBanner] = useState<boolean>(true);
+
+  // Loading Simulation
+  useEffect(() => {
+    setIsGridLoading(true);
+    const timer = setTimeout(() => setIsGridLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, [selectedCategory, selectedFilmStock, searchQuery, currentView]);
 
   // Filtered Photos List
   const filteredPhotos = useMemo(() => {
@@ -101,13 +112,26 @@ export default function Home() {
   };
 
   const handleBookmarkToggle = (photoId: string) => {
+    let isNowBookmarked = false;
     setPhotos((prev) =>
-      prev.map((p) => (p.id === photoId ? { ...p, isBookmarked: !p.isBookmarked } : p))
+      prev.map((p) => {
+        if (p.id === photoId) {
+          isNowBookmarked = !p.isBookmarked;
+          return { ...p, isBookmarked: isNowBookmarked };
+        }
+        return p;
+      })
     );
 
     if (activePhotoDetail && activePhotoDetail.id === photoId) {
       setActivePhotoDetail((prev) => (prev ? { ...prev, isBookmarked: !prev.isBookmarked } : null));
     }
+
+    // Trigger Toast AFTER state update, reading the computed value
+    // Since state is asynchronous, we compute it locally above
+    setTimeout(() => {
+      showToast(isNowBookmarked ? 'Foto disimpan ke koleksi!' : 'Foto dihapus dari koleksi', 'info');
+    }, 0);
   };
 
   const handleAddComment = (photoId: string, commentText: string) => {
@@ -178,6 +202,7 @@ export default function Home() {
   const handleUploadSuccess = (newPhoto: Photo) => {
     setPhotos((prev) => [newPhoto, ...prev]);
     setCurrentView('feed');
+    showToast('Karya foto berhasil diunggah!', 'success');
   };
 
   const handleSelectPhotographer = (photographerId: string) => {
@@ -198,7 +223,7 @@ export default function Home() {
     photographers.find((p) => p.id === selectedPhotographerId) || CURRENT_USER;
 
   return (
-    <div className="min-h-screen bg-[#F8F4E8] text-[#21120B] font-sans film-grain flex flex-col selection:bg-[#995F2F]/30 selection:text-[#622B14] overflow-x-hidden">
+    <div className="h-screen bg-[#082032] text-gray-100 font-sans film-grain flex flex-col selection:bg-[#334756]/30 selection:text-white overflow-hidden">
       
       {/* Top Header Navbar */}
       <Navbar
@@ -211,18 +236,24 @@ export default function Home() {
         userName={CURRENT_USER.name}
       />
 
-      {/* Main Body Layout with Hover-Expandable Desktop/Tablet Sidebar */}
-      <div className="flex flex-1 w-full">
-        {/* Left Sidebar for PC/Tablet (Thin by default, expands on hover) */}
-        <Sidebar
-          currentView={currentView}
-          onViewChange={handleViewChange}
-          userAvatar={CURRENT_USER.avatar}
-          userName={CURRENT_USER.name}
-        />
+      {/* Mobile Bottom Navigation */}
+      <BottomNav currentView={currentView} onViewChange={handleViewChange} />
 
-        {/* Main Content Area */}
-        <main className="flex-1 min-w-0 w-full px-4 sm:px-8 lg:px-12 py-6 pb-24 md:pb-12">
+      {/* Main Body Layout with Hover-Expandable Desktop/Tablet Sidebar */}
+      <div className="flex flex-1 w-full overflow-hidden">
+        {/* Left Sidebar for PC/Tablet (Thin by default, expands on hover) */}
+        {currentView !== 'upload' && (
+          <Sidebar
+            currentView={currentView}
+            onViewChange={handleViewChange}
+            userAvatar={CURRENT_USER.avatar}
+            userName={CURRENT_USER.name}
+          />
+        )}
+
+        {/* Scrollable Main Content Area */}
+        <div className="flex-1 min-w-0 w-full overflow-y-auto flex flex-col">
+          <main className="flex-1 px-4 sm:px-8 lg:px-12 py-6 pb-24 md:pb-12">
         
         {/* Feed View */}
         {currentView === 'feed' && (
@@ -230,23 +261,23 @@ export default function Home() {
             
             {/* Hero Section Banner Notification */}
             {showBanner && (
-              <div className="bg-[#622B14] text-[#E4D6A9] p-6 sm:p-8 sm:px-12 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6 -mx-4 sm:-mx-8 lg:-mx-12 -mt-6 mb-6">
+              <div className="bg-[#FF4C29] text-white p-6 sm:p-8 sm:px-12 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6 -mx-4 sm:-mx-8 lg:-mx-12 -mt-6 mb-6">
                 <button 
                   onClick={() => setShowBanner(false)}
-                  className="absolute top-4 right-4 p-1 text-[#E4D6A9]/70 hover:text-[#E4D6A9] transition-colors"
+                  className="absolute top-4 right-4 p-1 text-white/70 hover:text-white transition-colors"
                   aria-label="Tutup notifikasi"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5 text-white" />
                 </button>
                 <div className="space-y-2 max-w-2xl">
-                  <div className="flex items-center gap-2 text-[10px] text-[#E4D6A9] font-mono tracking-widest uppercase font-semibold">
-                    <Film className="w-3.5 h-3.5" />
+                  <div className="flex items-center gap-2 text-[10px] text-white font-mono tracking-widest uppercase font-semibold">
+                    <Film className="w-3.5 h-3.5 text-white" />
                     <span>Komunitas Galeri Foto Analog & Film</span>
                   </div>
                   <h1 className="font-serif-display text-xl sm:text-2xl font-bold leading-tight pr-8">
                     "Pholet" — Mengabadikan Foto Yang Pernah Terlupakan
                   </h1>
-                  <p className="text-xs sm:text-sm text-[#E4D6A9]/90 leading-relaxed font-sans">
+                  <p className="text-xs sm:text-sm text-white/90 leading-relaxed font-sans">
                     Saling memamerkan karya foto analog, berbagi catatan rol film (Portra, Gold, Cinestill), spesifikasi EXIF kamera, dan apresiasi antar fotografer.
                   </p>
                 </div>
@@ -254,13 +285,11 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
                   <button
                     onClick={() => setCurrentView('upload')}
-                    className="px-5 py-2.5 bg-[#E4D6A9] text-[#622B14] font-semibold text-xs rounded-full hover:bg-[#f3e8c9] transition-all shadow-sm flex items-center justify-center gap-2"
+                    className="px-5 py-2.5 bg-[#2C394B] text-white font-semibold text-xs rounded-full hover:bg-[#334756] transition-all shadow-sm flex items-center justify-center gap-2"
                   >
-                    <Camera className="w-4 h-4" />
+                    <Camera className="w-4 h-4 text-white" />
                     <span>Upload Foto</span>
                   </button>
-
-
                 </div>
               </div>
             )}
@@ -276,6 +305,7 @@ export default function Home() {
               onBookmarkToggle={handleBookmarkToggle}
               onClickPhoto={(photo) => setActivePhotoDetail(photo)}
               onClickPhotographer={handleSelectPhotographer}
+              isLoading={isGridLoading}
             />
 
           </div>
@@ -299,12 +329,12 @@ export default function Home() {
 
         {/* My Albums View */}
         {currentView === 'my-albums' && (
-          <div className="flex flex-col items-center justify-center py-32 text-[#622B14] space-y-4">
-            <div className="w-16 h-16 bg-[#E4D6A9] rounded-full flex items-center justify-center shadow-inner">
-              <Film className="w-8 h-8" />
+          <div className="flex flex-col items-center justify-center py-32 text-white space-y-4">
+            <div className="w-16 h-16 bg-[#2C394B] rounded-full flex items-center justify-center shadow-inner">
+              <Film className="w-8 h-8 text-[#FF4C29]" />
             </div>
             <h2 className="font-serif-display text-2xl font-bold">Album Saya</h2>
-            <p className="text-[#978F66] text-sm max-w-md text-center">
+            <p className="text-gray-400 text-sm max-w-md text-center">
               Fitur album sedang dalam pengembangan. Nantinya Anda bisa mengelompokkan foto-foto roll film Anda di sini.
             </p>
           </div>
@@ -313,19 +343,19 @@ export default function Home() {
         {/* My Photos View */}
         {currentView === 'my-photos' && (
           <div className="space-y-6">
-            <div className="flex items-center gap-3 border-b border-[#978F66]/30 pb-4 mb-6">
-              <div className="w-10 h-10 bg-[#E4D6A9] rounded-full flex items-center justify-center border border-[#978F66]/30">
-                <ImageIcon className="w-5 h-5 text-[#995F2F]" />
+            <div className="flex items-center gap-3 border-b border-[#334756]/30 pb-4 mb-6">
+              <div className="w-10 h-10 bg-[#2C394B] rounded-full flex items-center justify-center border border-[#334756]/30">
+                <ImageIcon className="w-5 h-5 text-[#FF4C29]" />
               </div>
               <div>
-                <h2 className="font-serif-display text-2xl font-bold text-[#622B14]">Foto Saya</h2>
-                <p className="text-xs text-[#978F66]">Koleksi semua foto yang telah Anda unggah</p>
+                <h2 className="font-serif-display text-2xl font-bold text-white">Foto Saya</h2>
+                <p className="text-xs text-gray-400">Koleksi semua foto yang telah Anda unggah</p>
               </div>
             </div>
             
             {photos.filter(p => p.photographerId === CURRENT_USER.id).length === 0 ? (
-               <div className="bg-[#F8F4E8] border border-[#978F66]/30 rounded-2xl p-12 text-center space-y-3 my-8">
-                 <p className="text-sm text-[#978F66]">Anda belum mengunggah foto satupun.</p>
+               <div className="bg-[#082032] border border-[#334756]/30 rounded-2xl p-12 text-center space-y-3 my-8">
+                 <p className="text-sm text-gray-400">Anda belum mengunggah foto satupun.</p>
                </div>
             ) : (
                <PhotoGrid
@@ -338,6 +368,7 @@ export default function Home() {
                  onBookmarkToggle={handleBookmarkToggle}
                  onClickPhoto={(photo) => setActivePhotoDetail(photo)}
                  onClickPhotographer={handleSelectPhotographer}
+                 isLoading={isGridLoading}
                />
             )}
           </div>
@@ -357,37 +388,38 @@ export default function Home() {
           <SettingsView />
         )}
 
-      </main>
-      </div>
+          </main>
 
-      {/* Footer */}
-      <footer className="bg-[#622B14] text-[#E4D6A9] border-t border-[#995F2F]/30 py-8 px-4 mt-auto">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#995F2F] flex items-center justify-center border border-[#E4D6A9]">
-              <Camera className="w-4 h-4 text-[#E4D6A9]" />
+          {/* Footer inside scrollable area */}
+          <footer className="bg-[#082032] text-white border-t border-[#334756]/30 py-8 px-4 mt-auto">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#334756] flex items-center justify-center border border-[#2C394B]">
+                  <Camera className="w-4 h-4 text-[#FF4C29]" />
+                </div>
+                <div>
+                  <span className="font-serif-display font-bold text-sm tracking-wider block">
+                    PHOLET
+                  </span>
+                  <span className="text-[10px] text-gray-400">
+                    Platform Komunitas Foto Analog & Terlupakan
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 text-gray-400">
+                <button onClick={() => setCurrentView('feed')} className="hover:text-white">Galeri Feed</button>
+                <span>•</span>
+                <button onClick={() => handleSelectPhotographer('user-me')} className="hover:text-white">Portofolio Saya</button>
+              </div>
+
+              <p className="text-[10px] text-gray-400">
+                © {new Date().getFullYear()} Pholet. Warm, Earthy & Artisanal Film Photography Gallery.
+              </p>
             </div>
-            <div>
-              <span className="font-serif-display font-bold text-sm tracking-wider block">
-                PHOLET
-              </span>
-              <span className="text-[10px] text-[#978F66]">
-                Platform Komunitas Foto Analog & Terlupakan
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 text-[#978F66]">
-            <button onClick={() => setCurrentView('feed')} className="hover:text-[#E4D6A9]">Galeri Feed</button>
-            <span>•</span>
-            <button onClick={() => handleSelectPhotographer('user-me')} className="hover:text-[#E4D6A9]">Portofolio Saya</button>
-          </div>
-
-          <p className="text-[10px] text-[#978F66]">
-            © {new Date().getFullYear()} Pholet. Warm, Earthy & Artisanal Film Photography Gallery.
-          </p>
+          </footer>
         </div>
-      </footer>
+      </div>
 
       {/* Photo Detail Modal */}
       {activePhotoDetail && (

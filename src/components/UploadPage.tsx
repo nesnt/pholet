@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Upload, Camera, Film, MapPin, Sparkles, Image as ImageIcon, Tag, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Upload, Camera, Film, MapPin, Image as ImageIcon, Tag, CheckCircle } from 'lucide-react';
 import { Photo, Photographer } from '../types';
 import { CATEGORIES, POPULAR_FILM_STOCKS } from '../data/mockData';
 
@@ -9,35 +9,12 @@ interface UploadPageProps {
   currentUser: Photographer;
 }
 
-const PRESET_SAMPLE_IMAGES = [
-  {
-    title: 'Sudut Kota Berdebu',
-    url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=1000',
-    category: 'Street' as const,
-    aspectRatio: 'landscape' as const,
-    stock: 'Kodak Portra 400',
-  },
-  {
-    title: 'Deretan Sepeda Tua di Pagi Hari',
-    url: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=80&w=1000',
-    category: 'Still Life' as const,
-    aspectRatio: 'portrait' as const,
-    stock: 'Kodak Gold 200',
-  },
-  {
-    title: 'Pijar Neon Kedai Makan 24 Jam',
-    url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&q=80&w=1000',
-    category: 'Street' as const,
-    aspectRatio: 'tall' as const,
-    stock: 'Cinestill 800T',
-  },
-  {
-    title: 'Bayangan Daun di Dinding Kapur',
-    url: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&q=80&w=1000',
-    category: 'Architecture' as const,
-    aspectRatio: 'square' as const,
-    stock: 'Ilford HP5 Plus',
-  }
+
+const STEPS = [
+  { id: 1, title: 'Upload Foto' },
+  { id: 2, title: 'Cerita Karya' },
+  { id: 3, title: 'Lokasi & Tag' },
+  { id: 4, title: 'Spesifikasi EXIF' }
 ];
 
 export const UploadPage: React.FC<UploadPageProps> = ({
@@ -45,12 +22,14 @@ export const UploadPage: React.FC<UploadPageProps> = ({
   onUploadSuccess,
   currentUser,
 }) => {
+  const [step, setStep] = useState(1);
+
   const [title, setTitle] = useState('');
   const [caption, setCaption] = useState('');
-  const [imageUrl, setImageUrl] = useState(PRESET_SAMPLE_IMAGES[0].url);
+  const [imageUrl, setImageUrl] = useState('');
   const [category, setCategory] = useState<Photo['category']>('Street');
   const [aspectRatio, setAspectRatio] = useState<Photo['aspectRatio']>('portrait');
-  
+
   // EXIF fields
   const [camera, setCamera] = useState('Yashica Electro 35 GSN');
   const [lens, setLens] = useState('Yashinon 45mm f/1.7');
@@ -61,8 +40,27 @@ export const UploadPage: React.FC<UploadPageProps> = ({
   const [location, setLocation] = useState('Yogyakarta, Indonesia');
   const [tagsInput, setTagsInput] = useState('AnalogFilm, KodakGold200, Street35mm');
 
+  const handleNext = () => {
+    if (step === 1 && !imageUrl.trim()) {
+      alert("Harap pilih atau masukkan URL gambar!");
+      return;
+    }
+    if (step === 2 && !title.trim()) {
+      alert("Harap isi judul foto!");
+      return;
+    }
+    setStep((s) => Math.min(s + 1, 4));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent implicit submission via Enter key before step 4
+    if (step < 4) {
+      handleNext();
+      return;
+    }
+
     if (!title.trim() || !imageUrl.trim()) return;
 
     const tagsArr = tagsInput
@@ -102,260 +100,315 @@ export const UploadPage: React.FC<UploadPageProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      
+    <div className="w-full space-y-6">
+
       {/* Top Header & Back Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#622B14] text-[#E4D6A9] p-6 rounded-2xl border border-[#995F2F]/40 shadow-md">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#FF4C29] text-white p-6 rounded-2xl shadow-md">
         <div className="space-y-1">
           <button
             onClick={onCancel}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-[#E4D6A9]/80 hover:text-[#E4D6A9] transition-colors mb-2 bg-[#995F2F]/40 px-3 py-1.5 rounded-full border border-[#E4D6A9]/20"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-white/80 hover:text-white transition-colors mb-2 bg-[#334756]/40 px-3 py-1.5 rounded-full border border-[#2C394B]/20"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 text-[#FF4C29]" />
             <span>Kembali ke Galeri</span>
           </button>
           <h1 className="font-serif-display text-2xl sm:text-3xl font-bold flex items-center gap-2.5">
-            <Camera className="w-7 h-7 text-[#E4D6A9]" />
+            <Camera className="w-7 h-7 text-[#FF4C29]" />
             <span>Upload Karya Foto Film Baru</span>
           </h1>
-          <p className="text-xs text-[#E4D6A9]/80">
+          <p className="text-xs text-white/80">
             Halaman publikasi foto analog. Isi detail kamera, rol film, dan catatan di balik jepretan Anda.
           </p>
         </div>
       </div>
 
       {/* Main Upload Form Layout */}
-      <form onSubmit={handleSubmit} className="bg-[#F8F4E8] border border-[#978F66]/40 rounded-2xl shadow-lg p-6 space-y-6">
-        
-        {/* Step 1: Image Selection / Preset Chooser */}
-        <div className="space-y-3 bg-[#E4D6A9]/20 p-4 sm:p-5 rounded-xl border border-[#978F66]/30">
-          <label className="font-semibold text-sm text-[#622B14] flex items-center gap-2">
-            <ImageIcon className="w-4 h-4 text-[#995F2F]" />
-            <span>Pilih Sampel Foto atau Masukkan URL Gambar *</span>
-          </label>
+      <div className="bg-[#082032] rounded-2xl shadow-lg p-6 space-y-8">
 
-          {/* Quick Preset Buttons */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {PRESET_SAMPLE_IMAGES.map((preset, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => {
-                  setImageUrl(preset.url);
-                  setCategory(preset.category);
-                  setAspectRatio(preset.aspectRatio);
-                  setFilmStock(preset.stock);
-                  if (!title) setTitle(preset.title);
-                }}
-                className={`relative aspect-video rounded-lg overflow-hidden border-2 transition-all ${
-                  imageUrl === preset.url
-                    ? 'border-[#622B14] ring-2 ring-[#995F2F] scale-[1.02]'
-                    : 'border-[#978F66]/30 opacity-70 hover:opacity-100'
-                }`}
-              >
-                <img src={preset.url} alt={preset.title} className="w-full h-full object-cover" />
-                <span className="absolute inset-x-0 bottom-0 bg-[#21120B]/80 text-[#E4D6A9] text-[10px] p-1 truncate block font-sans">
-                  {preset.title}
-                </span>
-              </button>
-            ))}
-          </div>
+        {/* Progress Stepper */}
+        <div className="flex items-center justify-between px-2 mb-2 relative">
+          <div className="absolute top-4 left-6 right-6 h-[2px] bg-[#2C394B]/50 -z-0" />
+          {STEPS.map((s, idx) => (
+            <div key={s.id} className="flex flex-col items-center relative z-10 w-full">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${step >= s.id ? 'bg-[#FF4C29] text-white' : 'bg-[#082032] text-gray-400 border-2 border-[#2C394B]/80'
+                }`}>
+                {step > s.id ? <CheckCircle className="w-4 h-4 text-[#FF4C29]" /> : s.id}
+              </div>
+              <span className={`text-[10px] sm:text-xs mt-2 font-medium text-center transition-colors ${step >= s.id ? 'text-white font-semibold' : 'text-gray-400'
+                }`}>
+                {s.title}
+              </span>
+              {/* Active track filling line */}
+              {idx < STEPS.length - 1 && (
+                <div className="absolute top-4 left-[50%] right-[-50%] h-[2px] -z-10 overflow-hidden">
+                  <div className={`h-full bg-[#FF4C29] transition-all duration-300 ${step > s.id ? 'w-full' : 'w-0'}`} />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
 
-          <div className="pt-2">
-            <input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="Atau tempelkan URL gambar langsung (https://...)"
-              className="w-full bg-[#F8F4E8] border border-[#978F66]/40 rounded-lg p-2.5 font-mono text-xs focus:ring-2 focus:ring-[#622B14] focus:outline-none"
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
 
-          {/* Live Preview Box */}
-          {imageUrl && (
-            <div className="bg-[#21120B] p-3 rounded-xl flex items-center justify-center max-h-72 overflow-hidden border border-[#978F66]/40 mt-3">
-              <img
-                src={imageUrl}
-                alt="Preview Photo"
-                className="max-h-64 object-contain rounded-md shadow-md"
-              />
+          {/* Step 1: Image Selection / Dropzone */}
+          {step === 1 && (
+            <div className="space-y-4 bg-[#2C394B]/20 p-4 sm:p-5 rounded-xl animate-fade-in">
+              <label className="font-semibold text-sm text-white flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-[#FF4C29]" />
+                <span>Pilih Foto dari Perangkat Anda *</span>
+              </label>
+
+              {!imageUrl ? (
+                <div
+                  className="w-full h-48 sm:h-64 border-2 border-dashed border-[#334756] rounded-xl flex flex-col items-center justify-center text-gray-400 hover:bg-[#082032]/50 hover:border-[#FF4C29] hover:text-white transition-colors cursor-pointer"
+                  onClick={() => document.getElementById('photo-upload-input')?.click()}
+                >
+                  <Upload className="w-8 h-8 mb-3 opacity-70 text-[#FF4C29]" />
+                  <p className="font-medium text-sm">Klik atau seret foto ke area ini</p>
+                  <p className="text-xs opacity-70 mt-1">Mendukung JPG, PNG (Maks 5MB)</p>
+                  <input
+                    id="photo-upload-input"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          setImageUrl(ev.target?.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="bg-[#082032] p-3 rounded-xl flex flex-col items-center justify-center max-h-80 overflow-hidden mt-3 relative group">
+                    <img
+                      src={imageUrl}
+                      alt="Preview Photo"
+                      className="max-h-72 object-contain rounded-md shadow-md"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setImageUrl('')}
+                      className="absolute top-4 right-4 bg-black/60 text-white px-3 py-1.5 rounded-full text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-900/80 border border-[#2C394B]/20"
+                    >
+                      Ganti Foto
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
-        </div>
 
-        {/* Step 2: Basic Info (Title & Category) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block font-semibold text-xs text-[#622B14] mb-1.5">
-              Judul Foto *
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Contoh: Senja di Pasar Antik"
-              className="w-full bg-[#E4D6A9]/30 border border-[#978F66]/40 rounded-lg p-2.5 text-xs text-[#21120B] focus:ring-2 focus:ring-[#622B14] focus:outline-none"
-              required
-            />
-          </div>
+          {/* Step 2: Basic Info (Title, Category, Caption) */}
+          {step === 2 && (
+            <div className="space-y-4 animate-fade-in">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-semibold text-xs text-white mb-1.5">
+                    Judul Foto *
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Contoh: Senja di Pasar Antik"
+                    className="w-full bg-[#2C394B]/30 rounded-lg p-2.5 text-xs text-gray-100 focus:ring-2 focus:ring-[#FF4C29] focus:outline-none"
+                    required
+                  />
+                </div>
 
-          <div>
-            <label className="block font-semibold text-xs text-[#622B14] mb-1.5">
-              Kategori Genre
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value as any)}
-              className="w-full bg-[#E4D6A9]/30 border border-[#978F66]/40 rounded-lg p-2.5 text-xs text-[#21120B] focus:ring-2 focus:ring-[#622B14] focus:outline-none"
-            >
-              {CATEGORIES.filter((c) => c !== 'Semua').map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+                <div>
+                  <label className="block font-semibold text-xs text-white mb-1.5">
+                    Kategori Genre
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value as any)}
+                    className="w-full bg-[#2C394B]/30 rounded-lg p-2.5 text-xs text-gray-100 focus:ring-2 focus:ring-[#FF4C29] focus:outline-none"
+                  >
+                    {CATEGORIES.filter((c) => c !== 'Semua').map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-        {/* Step 3: Story / Caption */}
-        <div>
-          <label className="block font-semibold text-xs text-[#622B14] mb-1.5">
-            Cerita & Catatan Fotografer (Caption)
-          </label>
-          <textarea
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            rows={3}
-            placeholder="Tuliskan latar belakang foto, nuansa emosi, tempat pencucian film, atau momen spesial saat pengambilan gambar..."
-            className="w-full bg-[#E4D6A9]/30 border border-[#978F66]/40 rounded-lg p-2.5 text-xs text-[#21120B] focus:ring-2 focus:ring-[#622B14] focus:outline-none"
-          />
-        </div>
-
-        {/* Step 4: EXIF Camera & Film Specs */}
-        <div className="bg-[#E4D6A9]/30 border border-[#978F66]/30 p-4 sm:p-5 rounded-xl space-y-3">
-          <h3 className="font-semibold text-xs text-[#622B14] flex items-center gap-2 border-b border-[#978F66]/30 pb-2">
-            <Film className="w-4 h-4 text-[#995F2F]" />
-            <span>Spesifikasi EXIF Kamera & Rol Film Analog</span>
-          </h3>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-            <div>
-              <label className="text-[11px] text-[#978F66] font-semibold block mb-1">Kamera</label>
-              <input
-                type="text"
-                value={camera}
-                onChange={(e) => setCamera(e.target.value)}
-                className="w-full bg-[#F8F4E8] border border-[#978F66]/40 rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#622B14]"
-              />
+              <div>
+                <label className="block font-semibold text-xs text-white mb-1.5">
+                  Cerita & Catatan Fotografer (Caption)
+                </label>
+                <textarea
+                  value={caption}
+                  onChange={(e) => setCaption(e.target.value)}
+                  rows={4}
+                  placeholder="Tuliskan latar belakang foto, nuansa emosi, tempat pencucian film, atau momen spesial saat pengambilan gambar..."
+                  className="w-full bg-[#2C394B]/30 rounded-lg p-2.5 text-xs text-gray-100 focus:ring-2 focus:ring-[#FF4C29] focus:outline-none"
+                />
+              </div>
             </div>
+          )}
 
-            <div>
-              <label className="text-[11px] text-[#978F66] font-semibold block mb-1">Lensa</label>
-              <input
-                type="text"
-                value={lens}
-                onChange={(e) => setLens(e.target.value)}
-                className="w-full bg-[#F8F4E8] border border-[#978F66]/40 rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#622B14]"
-              />
+          {/* Step 3: Location & Tags */}
+          {step === 3 && (
+            <div className="space-y-4 animate-fade-in">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="block font-semibold text-xs text-white mb-1.5 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-[#FF4C29]" />
+                    <span>Lokasi Pemotretan</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="Contoh: Kotagede, Yogyakarta"
+                    className="w-full bg-[#2C394B]/30 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-[#FF4C29] focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-xs text-white mb-1.5 flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5 text-[#FF4C29]" />
+                    <span>Tag (pisahkan dengan koma)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
+                    placeholder="Contoh: Portra400, GoldenHour, Street"
+                    className="w-full bg-[#2C394B]/30 rounded-lg p-2.5 text-xs font-mono focus:ring-2 focus:ring-[#FF4C29] focus:outline-none"
+                  />
+                </div>
+              </div>
             </div>
+          )}
 
-            <div>
-              <label className="text-[11px] text-[#978F66] font-semibold block mb-1">Rol Film (Stock)</label>
-              <select
-                value={filmStock}
-                onChange={(e) => setFilmStock(e.target.value)}
-                className="w-full bg-[#F8F4E8] border border-[#978F66]/40 rounded-lg p-2 text-xs font-mono focus:ring-1 focus:ring-[#622B14]"
+          {/* Step 4: EXIF Camera & Film Specs */}
+          {step === 4 && (
+            <div className="bg-[#2C394B]/30 p-4 sm:p-5 rounded-xl space-y-4 animate-fade-in">
+              <h3 className="font-semibold text-xs text-white flex items-center gap-2 border-b border-[#334756]/30 pb-2">
+                <Film className="w-4 h-4 text-[#FF4C29]" />
+                <span>Spesifikasi EXIF Kamera & Rol Film Analog</span>
+              </h3>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                <div>
+                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Kamera</label>
+                  <input
+                    type="text"
+                    value={camera}
+                    onChange={(e) => setCamera(e.target.value)}
+                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Lensa</label>
+                  <input
+                    type="text"
+                    value={lens}
+                    onChange={(e) => setLens(e.target.value)}
+                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Rol Film (Stock)</label>
+                  <select
+                    value={filmStock}
+                    onChange={(e) => setFilmStock(e.target.value)}
+                    className="w-full bg-[#082032] rounded-lg p-2 text-xs font-mono focus:ring-1 focus:ring-[#FF4C29]"
+                  >
+                    {POPULAR_FILM_STOCKS.filter(s => s !== 'Semua Rol Film').map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Aperture</label>
+                  <input
+                    type="text"
+                    value={aperture}
+                    onChange={(e) => setAperture(e.target.value)}
+                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Shutter Speed</label>
+                  <input
+                    type="text"
+                    value={shutterSpeed}
+                    onChange={(e) => setShutterSpeed(e.target.value)}
+                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">ISO Film</label>
+                  <input
+                    type="text"
+                    value={iso}
+                    onChange={(e) => setIso(e.target.value)}
+                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons Bar */}
+          <div className="pt-6 border-t border-[#334756]/30 flex items-center justify-between gap-3 mt-8">
+            {step === 1 ? (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="px-5 py-2.5 rounded-full text-white hover:bg-[#2C394B]/50 font-medium text-xs transition-colors border border-[#334756]/30"
               >
-                {POPULAR_FILM_STOCKS.filter(s => s !== 'Semua Rol Film').map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
+                Batal
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setStep((s) => s - 1)}
+                className="px-5 py-2.5 rounded-full text-white hover:bg-[#2C394B]/50 font-medium text-xs transition-colors border border-[#334756]/30 flex items-center gap-1.5"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 text-[#FF4C29]" />
+                <span>Sebelumnya</span>
+              </button>
+            )}
 
-            <div>
-              <label className="text-[11px] text-[#978F66] font-semibold block mb-1">Aperture</label>
-              <input
-                type="text"
-                value={aperture}
-                onChange={(e) => setAperture(e.target.value)}
-                className="w-full bg-[#F8F4E8] border border-[#978F66]/40 rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#622B14]"
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] text-[#978F66] font-semibold block mb-1">Shutter Speed</label>
-              <input
-                type="text"
-                value={shutterSpeed}
-                onChange={(e) => setShutterSpeed(e.target.value)}
-                className="w-full bg-[#F8F4E8] border border-[#978F66]/40 rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#622B14]"
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] text-[#978F66] font-semibold block mb-1">ISO Film</label>
-              <input
-                type="text"
-                value={iso}
-                onChange={(e) => setIso(e.target.value)}
-                className="w-full bg-[#F8F4E8] border border-[#978F66]/40 rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#622B14]"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Step 5: Location & Tags */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block font-semibold text-xs text-[#622B14] mb-1.5 flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-[#995F2F]" />
-              <span>Lokasi Pemotretan</span>
-            </label>
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="Contoh: Kotagede, Yogyakarta"
-              className="w-full bg-[#E4D6A9]/30 border border-[#978F66]/40 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-[#622B14] focus:outline-none"
-            />
+            {step < 4 ? (
+              <button
+                key="btn-next"
+                type="button"
+                onClick={handleNext}
+                className="px-6 py-2.5 rounded-full bg-[#FF4C29] text-white font-semibold text-xs hover:bg-[#334756] shadow-md transition-all transform hover:-translate-y-0.5"
+              >
+                Selanjutnya
+              </button>
+            ) : (
+              <button
+                key="btn-submit"
+                type="submit"
+                className="px-6 py-2.5 rounded-full bg-[#FF4C29] text-white font-semibold text-xs hover:bg-[#334756] shadow-md flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+              >
+                <Upload className="w-4 h-4 text-[#FF4C29]" />
+                <span>Publikasikan Karya</span>
+              </button>
+            )}
           </div>
 
-          <div>
-            <label className="block font-semibold text-xs text-[#622B14] mb-1.5 flex items-center gap-1.5">
-              <Tag className="w-3.5 h-3.5 text-[#995F2F]" />
-              <span>Tag (pisahkan dengan koma)</span>
-            </label>
-            <input
-              type="text"
-              value={tagsInput}
-              onChange={(e) => setTagsInput(e.target.value)}
-              placeholder="Contoh: Portra400, GoldenHour, Street"
-              className="w-full bg-[#E4D6A9]/30 border border-[#978F66]/40 rounded-lg p-2.5 text-xs font-mono focus:ring-2 focus:ring-[#622B14] focus:outline-none"
-            />
-          </div>
-        </div>
-
-        {/* Action Buttons Bar */}
-        <div className="pt-4 border-t border-[#978F66]/30 flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-5 py-2.5 rounded-full border border-[#978F66]/50 text-[#622B14] hover:bg-[#E4D6A9]/50 font-medium text-xs transition-colors"
-          >
-            Batal
-          </button>
-
-          <button
-            type="submit"
-            className="px-7 py-2.5 rounded-full bg-[#622B14] text-[#E4D6A9] font-semibold text-xs hover:bg-[#995F2F] shadow-md flex items-center gap-2 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
-          >
-            <Upload className="w-4 h-4" />
-            <span>Publikasikan Karya Foto</span>
-          </button>
-        </div>
-
-      </form>
+        </form>
+      </div>
 
     </div>
   );
