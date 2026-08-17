@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+datasource db {
+  provider = "postgresql"
+
+}
+
+model User {
+  id        String    @id @default(uuid())
+  username  String    @unique
+  password  String
+  name      String
+  avatar    String?    
+  bio       String?    
+  location  String?    
+  photos    Photo[]
+  comments  Comment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Photo {
+  id           String    @id @default(uuid())
+  title        String
+  caption      String?
+  url          String    
+  likesCount   Int       @default(0) 
+  category     String    
+  aspectRatio  String   
+  tags         String[]  
+  
+  camera       String?
+  lens         String?
+  filmStock    String?
+  iso          String?
+  aperture     String?
+  shutterSpeed String?
+  focalLength  String?
+  location     String?
+  dateTaken    String?
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments     Comment[] 
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+model Comment {
+  id        String   @id @default(uuid())
+  text      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photoId   String
+  photo     Photo    @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
