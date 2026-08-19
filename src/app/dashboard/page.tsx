@@ -36,7 +36,7 @@ export default function Home() {
   const [selectedFilmStock, setSelectedFilmStock] = useState<string>('Semua Rol Film');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Fetch Current User Session
+  // Fetch Current User
   useEffect(() => {
     fetch('/api/auth/me')
       .then((res) => {
@@ -48,16 +48,16 @@ export default function Home() {
           const userObj: Photographer = {
             id: data.user.id,
             name: data.user.name,
-            handle: '@' + (data.user.username || data.user.email || 'user'),
-            avatar: data.user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
-            bio: data.user.bio || 'Halo, saya penggemar fotografi analog!',
-            location: data.user.location || 'Indonesia',
+            handle: '@' + data.user.email, // using email as handle for now
+            avatar: data.user.avatar || '',
+            bio: data.user.bio || '',
+            location: data.user.location || '',
             website: '',
-            filmGear: ['Yashica Electro 35 GSN', 'Kodak Gold 200'],
+            filmGear: [],
             followersCount: 0,
             followingCount: 0,
             photosCount: 0,
-            bannerUrl: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=1200',
+            bannerUrl: '',
             isFollowing: false,
           };
           setCurrentUser(userObj);
@@ -70,69 +70,6 @@ export default function Home() {
         router.push('/login');
       });
   }, [router]);
-
-  // Fetch Photos from PostgreSQL API
-  const fetchPhotos = async () => {
-    try {
-      const res = await fetch('/api/photos');
-      const data = await res.json();
-      if (data.photos) {
-        const mappedPhotos: Photo[] = data.photos.map((p: any) => ({
-          id: p.id,
-          title: p.title,
-          url: p.url,
-          caption: p.caption || '',
-          photographerId: p.userId,
-          photographer: {
-            id: p.user.id,
-            name: p.user.name,
-            handle: '@' + (p.user.username || 'photographer'),
-            avatar: p.user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
-            bio: '',
-            location: '',
-            filmGear: [],
-            followersCount: 0,
-            followingCount: 0,
-            photosCount: 0,
-            bannerUrl: '',
-          },
-          likesCount: p.likesCount || 0,
-          isLiked: false,
-          isBookmarked: false,
-          comments: (p.comments || []).map((c: any) => ({
-            id: c.id,
-            userId: c.userId,
-            userName: c.user?.name || 'User',
-            userAvatar: c.user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
-            text: c.text,
-            createdAt: new Date(c.createdAt).toLocaleTimeString(),
-          })),
-          exif: {
-            camera: p.camera || '-',
-            lens: p.lens || '-',
-            filmStock: p.filmStock || '-',
-            iso: p.iso || '-',
-            aperture: p.aperture || '-',
-            shutterSpeed: p.shutterSpeed || '-',
-            focalLength: '45mm',
-            location: p.location || '-',
-            dateTaken: new Date(p.createdAt).toLocaleDateString(),
-          },
-          tags: p.tags || [],
-          category: p.category || 'Street',
-          aspectRatio: p.aspectRatio || 'portrait',
-          createdAt: new Date(p.createdAt).toLocaleDateString(),
-        }));
-        setPhotos(mappedPhotos);
-      }
-    } catch (err) {
-      console.error("Fetch photos error:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchPhotos();
-  }, []);
   
   // Modals
   const [activePhotoDetail, setActivePhotoDetail] = useState<Photo | null>(null);
@@ -144,6 +81,114 @@ export default function Home() {
     const timer = setTimeout(() => setIsGridLoading(false), 500);
     return () => clearTimeout(timer);
   }, [selectedCategory, selectedFilmStock, searchQuery, currentView]);
+
+    // Ambil user yang sedang login & daftar foto dari PostgreSQL saat halaman dimuat
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setIsGridLoading(true);
+        
+        // 1. Cek User Session
+        const resMe = await fetch('/api/auth/me');
+        if (!resMe.ok) {
+          window.location.href = '/login';
+          return;
+        }
+
+        // 2. Fetch Photos dari Database PostgreSQL
+        const resPhotos = await fetch('/api/photos');
+        if (resPhotos.ok) {
+          const data = await resPhotos.json();
+          // Format data foto dari API
+          const formattedPhotos = data.photos.map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            caption: p.caption,
+            url: p.url,
+            likesCount: p.likesCount,
+            category: p.category,
+            aspectRatio: p.aspectRatio,
+            createdAt: new Date(p.createdAt).toLocaleDateString('id-ID'),
+            photographerId: p.user.id,
+            photographer: {
+              id: p.user.id,
+              name: p.user.name,
+              handle: `@${p.user.username || 'user'}`,
+              avatar: p.user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
+              bio: 'Pengguna Pholet',
+              location: 'Indonesia',
+              filmGear: [],
+              followersCount: 0,
+              followingCount: 0,
+              photosCount: 1,
+              bannerUrl: '',
+            },
+            exif: {
+              camera: p.camera || '-',
+              lens: p.lens || '-',
+              filmStock: p.filmStock || '-',
+              iso: p.iso || '-',
+              aperture: p.aperture || '-',
+              shutterSpeed: p.shutterSpeed || '-',
+              focalLength: p.focalLength || '-',
+              location: p.location || '-',
+              dateTaken: new Date(p.createdAt).toLocaleDateString('id-ID'),
+            },
+            comments: p.comments || [],
+            tags: p.tags || [],
+          }));
+          setPhotos(formattedPhotos);
+        }
+      } catch (err) {
+        console.error("Load Dashboard Error:", err);
+      } finally {
+        setIsGridLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  // Update fungsi handleLikeToggle untuk mengirim ke API PostgreSQL
+  const handleLikeToggle = async (photoId: string) => {
+    // Optimistic UI Update & API Call
+    try {
+      const res = await fetch(`/api/photos/${photoId}/like`, {
+        method: 'POST',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPhotos((prev) =>
+          prev.map((p) => {
+            if (p.id === photoId) {
+              const nextLiked = !p.isLiked;
+              return {
+                ...p,
+                isLiked: nextLiked,
+                likesCount: data.likesCount !== undefined ? data.likesCount : (nextLiked ? p.likesCount + 1 : Math.max(0, p.likesCount - 1)),
+              };
+            }
+            return p;
+          })
+        );
+
+        // Keep active detail photo state synced
+        if (activePhotoDetail && activePhotoDetail.id === photoId) {
+          setActivePhotoDetail((prev) => {
+            if (!prev) return null;
+            const nextLiked = !prev.isLiked;
+            return {
+              ...prev,
+              isLiked: nextLiked,
+              likesCount: data.likesCount !== undefined ? data.likesCount : (nextLiked ? prev.likesCount + 1 : Math.max(0, prev.likesCount - 1)),
+            };
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Like error:", err);
+    }
+  };
 
   // Filtered Photos List
   const filteredPhotos = useMemo(() => {
@@ -181,34 +226,6 @@ export default function Home() {
     });
   }, [photos, selectedCategory, selectedFilmStock, searchQuery]);
 
-  // Actions
-  const handleLikeToggle = async (photoId: string) => {
-    // Optimistic UI (+1 like counter tanpa batas)
-    setPhotos((prev) =>
-      prev.map((p) => {
-        if (p.id === photoId) {
-          return {
-            ...p,
-            likesCount: p.likesCount + 1,
-            isLiked: true,
-          };
-        }
-        return p;
-      })
-    );
-
-    if (activePhotoDetail && activePhotoDetail.id === photoId) {
-      setActivePhotoDetail((prev) => (prev ? { ...prev, likesCount: prev.likesCount + 1, isLiked: true } : null));
-    }
-
-    // Call PostgreSQL API for infinite like
-    try {
-      await fetch(`/api/photos/${photoId}/like`, { method: 'POST' });
-    } catch (err) {
-      console.error('Like error:', err);
-    }
-  };
-
   const handleBookmarkToggle = (photoId: string) => {
     let isNowBookmarked = false;
     setPhotos((prev) =>
@@ -225,6 +242,8 @@ export default function Home() {
       setActivePhotoDetail((prev) => (prev ? { ...prev, isBookmarked: !prev.isBookmarked } : null));
     }
 
+    // Trigger Toast AFTER state update, reading the computed value
+    // Since state is asynchronous, we compute it locally above
     setTimeout(() => {
       showToast(isNowBookmarked ? 'Foto disimpan ke koleksi!' : 'Foto dihapus dari koleksi', 'info');
     }, 0);
@@ -232,6 +251,7 @@ export default function Home() {
 
   const handleAddComment = (photoId: string, commentText: string) => {
     if (!currentUser) return;
+    
     const newComment = {
       id: `c-${Date.now()}`,
       userId: currentUser.id,
@@ -274,13 +294,73 @@ export default function Home() {
         return p;
       })
     );
+
+    // Sync in photos array
+    setPhotos((prev) =>
+      prev.map((photo) => {
+        if (photo.photographer.id === photographerId) {
+          const nextFollowing = !photo.photographer.isFollowing;
+          return {
+            ...photo,
+            photographer: {
+              ...photo.photographer,
+              isFollowing: nextFollowing,
+              followersCount: nextFollowing
+                ? photo.photographer.followersCount + 1
+                : Math.max(0, photo.photographer.followersCount - 1),
+            },
+          };
+        }
+        return photo;
+      })
+    );
   };
 
-  const handleUploadSuccess = (newPhoto: Photo) => {
-    setPhotos((prev) => [newPhoto, ...prev]);
+  const handleUploadSuccess = (rawPhoto: any) => {
+    const formattedPhoto: Photo = {
+      id: rawPhoto.id,
+      title: rawPhoto.title,
+      caption: rawPhoto.caption,
+      url: rawPhoto.url,
+      likesCount: rawPhoto.likesCount || 0,
+      category: rawPhoto.category,
+      aspectRatio: rawPhoto.aspectRatio,
+      createdAt: new Date(rawPhoto.createdAt).toLocaleDateString('id-ID'),
+      photographerId: rawPhoto.user.id,
+      photographer: {
+        id: rawPhoto.user.id,
+        name: rawPhoto.user.name,
+        handle: `@${rawPhoto.user.email ? rawPhoto.user.email.split('@')[0] : 'user'}`,
+        avatar: rawPhoto.user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
+        bio: 'Pengguna Pholet',
+        location: 'Indonesia',
+        filmGear: [],
+        followersCount: 0,
+        followingCount: 0,
+        photosCount: 1,
+        bannerUrl: '',
+        isFollowing: false,
+      },
+      exif: {
+        camera: rawPhoto.camera || '-',
+        lens: rawPhoto.lens || '-',
+        filmStock: rawPhoto.filmStock || '-',
+        iso: rawPhoto.iso || '-',
+        aperture: rawPhoto.aperture || '-',
+        shutterSpeed: rawPhoto.shutterSpeed || '-',
+        focalLength: rawPhoto.focalLength || '-',
+        location: rawPhoto.location || '-',
+        dateTaken: new Date(rawPhoto.createdAt).toLocaleDateString('id-ID'),
+      },
+      comments: rawPhoto.comments || [],
+      tags: rawPhoto.tags || [],
+      isLiked: false,
+      isBookmarked: false,
+    };
+
+    setPhotos((prev) => [formattedPhoto, ...prev]);
     setCurrentView('feed');
-    showToast('Karya foto berhasil diunggah ke PostgreSQL & public/uploads!', 'success');
-    fetchPhotos(); // Refresh from DB
+    showToast('Karya foto berhasil diunggah!', 'success');
   };
 
   const handleSelectPhotographer = (photographerId: string) => {
@@ -296,20 +376,17 @@ export default function Home() {
     setCurrentView(view);
   };
 
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/login');
-  };
+  // Currently viewed photographer object
+  const activePhotographer =
+    photographers.find((p) => p.id === selectedPhotographerId) || currentUser;
 
-  if (!currentUser) {
+  if (!currentUser || !activePhotographer) {
     return (
-      <div className="h-screen bg-[#082032] text-white flex items-center justify-center">
-        <p className="animate-pulse text-sm text-gray-400">Memuat data pengguna & database...</p>
+      <div className="h-screen bg-[#082032] flex items-center justify-center text-white font-serif-display text-2xl">
+        Memuat...
       </div>
     );
   }
-
-  const activePhotographer = currentUser;
 
   return (
     <div className="h-screen bg-[#082032] text-gray-100 font-sans film-grain flex flex-col selection:bg-[#334756]/30 selection:text-white overflow-hidden">
@@ -330,7 +407,7 @@ export default function Home() {
 
       {/* Main Body Layout with Hover-Expandable Desktop/Tablet Sidebar */}
       <div className="flex flex-1 w-full overflow-hidden">
-        {/* Left Sidebar for PC/Tablet */}
+        {/* Left Sidebar for PC/Tablet (Thin by default, expands on hover) */}
         {currentView !== 'upload' && (
           <Sidebar
             currentView={currentView}
@@ -340,103 +417,177 @@ export default function Home() {
           />
         )}
 
-        {/* Dynamic Center Main Content Canvas Area */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-8 scrollbar-thin scrollbar-thumb-[#334756] scrollbar-track-transparent">
-          
-          {/* Main Feed View */}
-          {currentView === 'feed' && (
-            <div className="space-y-6 max-w-7xl mx-auto">
-              
-              {/* Optional Welcome Banner */}
-              {showBanner && (
-                <div className="relative bg-gradient-to-r from-[#2C394B] to-[#334756] p-6 rounded-2xl border border-[#334756]/40 shadow-lg text-white overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <button 
-                    onClick={() => setShowBanner(false)}
-                    className="absolute top-3 right-3 text-gray-400 hover:text-white p-1 rounded-full hover:bg-black/20"
-                    title="Tutup banner"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                  <div className="space-y-1.5 z-10 max-w-2xl">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF4C29]/20 text-[#FF4C29] text-xs font-semibold">
-                      <Film className="w-3.5 h-3.5" />
-                      <span>Selamat Datang, {currentUser.name}!</span>
-                    </div>
-                    <h2 className="text-xl sm:text-2xl font-bold font-serif-display text-white">
-                      Ruang Pameran & Komunitas Rol Film Analog
-                    </h2>
-                    <p className="text-xs text-gray-300">
-                      Seluruh foto yang diunggah akan disimpan di folder <code className="bg-[#082032] px-1.5 py-0.5 rounded text-[#FF4C29]">public/uploads</code> dan tercatat di database PostgreSQL lokal.
-                    </p>
+        {/* Scrollable Main Content Area */}
+        <div className="flex-1 min-w-0 w-full overflow-y-auto flex flex-col">
+          <main className="flex-1 px-4 sm:px-8 lg:px-12 py-6 pb-24 md:pb-12">
+        
+        {/* Feed View */}
+        {currentView === 'feed' && (
+          <div className="space-y-6">
+            
+            {/* Hero Section Banner Notification */}
+            {showBanner && (
+              <div className="bg-[#FF4C29] text-white p-6 sm:p-8 sm:px-12 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6 -mx-4 sm:-mx-8 lg:-mx-12 -mt-6 mb-6">
+                <button 
+                  onClick={() => setShowBanner(false)}
+                  className="absolute top-4 right-4 p-1 text-white/70 hover:text-white transition-colors"
+                  aria-label="Tutup notifikasi"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
+                <div className="space-y-2 max-w-2xl">
+                  <div className="flex items-center gap-2 text-[10px] text-white font-mono tracking-widest uppercase font-semibold">
+                    <Film className="w-3.5 h-3.5 text-white" />
+                    <span>Komunitas Galeri Foto Analog & Film</span>
                   </div>
-                  <button 
-                    onClick={() => setCurrentView('upload')}
-                    className="z-10 shrink-0 px-5 py-2.5 bg-[#FF4C29] hover:bg-[#ff3b14] text-white text-xs font-semibold rounded-full shadow-md transition-all flex items-center gap-2"
-                  >
-                    <Camera className="w-4 h-4" />
-                    <span>Upload Karya Baru</span>
-                  </button>
+                  <h1 className="font-serif-display text-xl sm:text-2xl font-bold leading-tight pr-8">
+                    "Pholet" — Mengabadikan Foto Yang Pernah Terlupakan
+                  </h1>
+                  <p className="text-xs sm:text-sm text-white/90 leading-relaxed font-sans">
+                    Saling memamerkan karya foto analog, berbagi catatan rol film (Portra, Gold, Cinestill), spesifikasi EXIF kamera, dan apresiasi antar fotografer.
+                  </p>
                 </div>
-              )}
 
-              {/* Photo Masonry Grid Section */}
-              {photos.length === 0 ? (
-                <div className="text-center py-16 bg-[#2C394B]/20 border border-[#334756]/40 rounded-2xl">
-                  <Camera className="w-12 h-12 text-[#FF4C29] mx-auto mb-3 opacity-60" />
-                  <h3 className="text-lg font-bold text-white">Belum Ada Foto di Database PostgreSQL</h3>
-                  <p className="text-xs text-gray-400 mt-1 mb-4">Jadilah yang pertama mengunggah foto karya analogmu!</p>
+                <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
                   <button
                     onClick={() => setCurrentView('upload')}
-                    className="px-5 py-2.5 bg-[#FF4C29] hover:bg-[#ff3b14] text-white text-xs font-semibold rounded-full shadow-md transition-all"
+                    className="px-5 py-2.5 bg-[#2C394B] text-white font-semibold text-xs rounded-full hover:bg-[#334756] transition-all shadow-sm flex items-center justify-center gap-2"
                   >
-                    Unggah Foto Pertamamu
+                    <Camera className="w-4 h-4 text-white" />
+                    <span>Upload Foto</span>
                   </button>
                 </div>
-              ) : (
-                <PhotoGrid
-                  photos={filteredPhotos}
-                  isLoading={isGridLoading}
-                  onLikeToggle={handleLikeToggle}
-                  onBookmarkToggle={handleBookmarkToggle}
-                  onClickPhoto={(photo) => setActivePhotoDetail(photo)}
-                  onClickPhotographer={handleSelectPhotographer}
-                />
-              )}
-            </div>
-          )}
+              </div>
+            )}
 
-          {/* Profile View */}
-          {currentView === 'profile' && (
-            <ProfilePage
-              photographer={activePhotographer}
-              userPhotos={photos.filter((p) => p.photographerId === activePhotographer.id)}
+            {/* Masonry Photo Grid */}
+            <PhotoGrid
+              photos={filteredPhotos}
+              selectedCategory={selectedCategory}
+              onCategorySelect={setSelectedCategory}
+              selectedFilmStock={selectedFilmStock}
+              onFilmStockSelect={setSelectedFilmStock}
               onLikeToggle={handleLikeToggle}
               onBookmarkToggle={handleBookmarkToggle}
               onClickPhoto={(photo) => setActivePhotoDetail(photo)}
-              onToggleFollow={handleToggleFollowPhotographer}
-              isCurrentUser={true}
+              onClickPhotographer={handleSelectPhotographer}
+              isLoading={isGridLoading}
             />
-          )}
 
-          {/* Upload View */}
-          {currentView === 'upload' && (
-            <UploadPage
-              onCancel={() => setCurrentView('feed')}
-              onUploadSuccess={handleUploadSuccess}
-              currentUser={currentUser}
-            />
-          )}
+          </div>
+        )}
 
-          {/* Design Specs View */}
-          {currentView === 'my-albums' && <DesignSpecView />}
+        {/* Profile View */}
+        {currentView === 'profile' && (
+          <ProfilePage
+            photographer={activePhotographer}
+            photos={photos}
+            onLikeToggle={handleLikeToggle}
+            onBookmarkToggle={handleBookmarkToggle}
+            onClickPhoto={(photo) => setActivePhotoDetail(photo)}
+            onClickPhotographer={handleSelectPhotographer}
+            onToggleFollow={handleToggleFollowPhotographer}
+            isCurrentUser={activePhotographer.id === currentUser.id}
+          />
+        )}
 
-          {/* Settings View */}
-          {currentView === 'settings' && <SettingsView />}
 
-        </main>
+
+        {/* My Albums View */}
+        {currentView === 'my-albums' && (
+          <div className="flex flex-col items-center justify-center py-32 text-white space-y-4">
+            <div className="w-16 h-16 bg-[#2C394B] rounded-full flex items-center justify-center shadow-inner">
+              <Film className="w-8 h-8 text-[#FF4C29]" />
+            </div>
+            <h2 className="font-serif-display text-2xl font-bold">Album Saya</h2>
+            <p className="text-gray-400 text-sm max-w-md text-center">
+              Fitur album sedang dalam pengembangan. Nantinya Anda bisa mengelompokkan foto-foto roll film Anda di sini.
+            </p>
+          </div>
+        )}
+
+        {/* My Photos View */}
+        {currentView === 'my-photos' && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 border-b border-[#334756]/30 pb-4 mb-6">
+              <div className="w-10 h-10 bg-[#2C394B] rounded-full flex items-center justify-center border border-[#334756]/30">
+                <ImageIcon className="w-5 h-5 text-[#FF4C29]" />
+              </div>
+              <div>
+                <h2 className="font-serif-display text-2xl font-bold text-white">Foto Saya</h2>
+                <p className="text-xs text-gray-400">Koleksi semua foto yang telah Anda unggah</p>
+              </div>
+            </div>
+            
+            {photos.filter(p => p.photographerId === currentUser.id).length === 0 ? (
+               <div className="bg-[#082032] border border-[#334756]/30 rounded-2xl p-12 text-center space-y-3 my-8">
+                 <p className="text-sm text-gray-400">Anda belum mengunggah foto satupun.</p>
+               </div>
+            ) : (
+               <PhotoGrid
+                 photos={filteredPhotos.filter(p => p.photographerId === currentUser.id)}
+                 selectedCategory={selectedCategory}
+                 onCategorySelect={setSelectedCategory}
+                 selectedFilmStock={selectedFilmStock}
+                 onFilmStockSelect={setSelectedFilmStock}
+                 onLikeToggle={handleLikeToggle}
+                 onBookmarkToggle={handleBookmarkToggle}
+                 onClickPhoto={(photo) => setActivePhotoDetail(photo)}
+                 onClickPhotographer={handleSelectPhotographer}
+                 isLoading={isGridLoading}
+               />
+            )}
+          </div>
+        )}
+
+        {/* Upload Page View */}
+        {currentView === 'upload' && (
+          <UploadPage
+            onCancel={() => setCurrentView('feed')}
+            onUploadSuccess={handleUploadSuccess}
+            currentUser={currentUser}
+          />
+        )}
+
+        {/* Settings View */}
+        {currentView === 'settings' && (
+          <SettingsView />
+        )}
+
+          </main>
+
+          {/* Footer inside scrollable area */}
+          <footer className="bg-[#082032] text-white border-t border-[#334756]/30 py-8 px-4 mt-auto">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#334756] flex items-center justify-center border border-[#2C394B]">
+                  <Camera className="w-4 h-4 text-[#FF4C29]" />
+                </div>
+                <div>
+                  <span className="font-serif-display font-bold text-sm tracking-wider block">
+                    PHOLET
+                  </span>
+                  <span className="text-[10px] text-gray-400">
+                    Platform Komunitas Foto Analog & Terlupakan
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 text-gray-400">
+                <button onClick={() => setCurrentView('feed')} className="hover:text-white">Galeri Feed</button>
+                <span>•</span>
+                <button onClick={() => handleSelectPhotographer('user-me')} className="hover:text-white">Portofolio Saya</button>
+              </div>
+
+              <p className="text-[10px] text-gray-400">
+                © {new Date().getFullYear()} Pholet. Warm, Earthy & Artisanal Film Photography Gallery.
+              </p>
+            </div>
+          </footer>
+        </div>
       </div>
 
-      {/* Photo Detail Modal Popup */}
+      {/* Photo Detail Modal */}
       {activePhotoDetail && (
         <PhotoDetailModal
           photo={activePhotoDetail}
@@ -444,10 +595,12 @@ export default function Home() {
           onLikeToggle={handleLikeToggle}
           onBookmarkToggle={handleBookmarkToggle}
           onAddComment={handleAddComment}
-          onClickPhotographer={handleSelectPhotographer}
+          onToggleFollowPhotographer={handleToggleFollowPhotographer}
+          onSelectPhotographer={handleSelectPhotographer}
         />
       )}
 
     </div>
   );
 }
+

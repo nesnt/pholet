@@ -1,20 +1,30 @@
+// src/app/api/photos/route.ts
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import path from "path";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile } from "fs/promises";
 
-// 1. GET: Ambil semua foto dari PostgreSQL
+// 1. GET: Ambil foto Publik + foto Privat milik user yang sedang login saja
 export async function GET() {
   try {
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("userId")?.value;
+
     const photos = await db.photo.findMany({
+      where: {
+        OR: [
+          { isPrivate: false }, // Ambil semua foto Publik
+          ...(userId ? [{ isPrivate: true, userId }] : []), // Ambil foto Privat HANYA jika milik user yang sedang login
+        ],
+      },
       orderBy: { createdAt: "desc" },
       include: {
         user: {
           select: {
             id: true,
             name: true,
-            username: true,
+            email: true,
             avatar: true,
           },
         },
@@ -39,10 +49,9 @@ export async function GET() {
   }
 }
 
-// 2. POST: Upload foto baru ke folder public/uploads & Simpan ke PostgreSQL
+// 2. POST: Upload foto baru (dengan pilihan isPrivate)
 export async function POST(req: Request) {
   try {
-    // Cek Session User
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
 
@@ -53,14 +62,14 @@ export async function POST(req: Request) {
       );
     }
 
-    // Ambil data form (FormData)
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     const title = formData.get("title") as string;
     const caption = (formData.get("caption") as string) || "";
     const category = (formData.get("category") as string) || "Street";
     const aspectRatio = (formData.get("aspectRatio") as string) || "portrait";
-    
+    const isPrivate = formData.get("isPrivate") === "true"; // BACA PRIVASI
+
     // Metadata EXIF
     const camera = (formData.get("camera") as string) || "";
     const lens = (formData.get("lens") as string) || "";
@@ -77,25 +86,19 @@ export async function POST(req: Request) {
       );
     }
 
-    // Pastikan folder public/uploads tersedia
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-
     // Simpan file fisik ke folder public/uploads
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Buat nama file unik menggunakan timestamp
     const uniqueFilename = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
+    const uploadDir = path.join(process.cwd(), "public", "uploads");
     const filePath = path.join(uploadDir, uniqueFilename);
 
-    // Tulis berkas ke disk lokal
     await writeFile(filePath, buffer);
 
-    // Path URL yang dapat diakses publik dari browser (misal: /uploads/171829384-foto.jpg)
     const publicUrl = `/uploads/${uniqueFilename}`;
 
-    // Simpan metadata foto ke database PostgreSQL via Prisma
+    // Simpan data foto ke PostgreSQL (sertakan isPrivate)
     const newPhoto = await db.photo.create({
       data: {
         title,
@@ -103,6 +106,7 @@ export async function POST(req: Request) {
         url: publicUrl,
         category,
         aspectRatio,
+        isPrivate, // SIMPAN STATUS PRIVASI
         camera,
         lens,
         filmStock,
@@ -114,7 +118,7 @@ export async function POST(req: Request) {
       },
       include: {
         user: {
-          select: { id: true, name: true, username: true, avatar: true },
+          select: { id: true, name: true, email: true, avatar: true },
         },
       },
     });
@@ -130,4 +134,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
+} 

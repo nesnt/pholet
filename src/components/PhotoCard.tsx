@@ -85,7 +85,7 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({
             className="flex items-center gap-2.5 text-left group/user hover:opacity-90 transition-opacity"
           >
             <img
-              src={photo.photographer.avatar}
+              src={photo.photographer.avatar || undefined}
               alt={photo.photographer.name}
               className="w-8 h-8 rounded-full object-cover border border-white/30 group-hover/user:border-[#FF4C29] transition-colors"
             />

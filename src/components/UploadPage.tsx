@@ -5,9 +5,10 @@ import { CATEGORIES, POPULAR_FILM_STOCKS } from '../data/mockData';
 
 interface UploadPageProps {
   onCancel: () => void;
-  onUploadSuccess: (newPhoto: Photo) => void;
+  onUploadSuccess: (newPhoto: any) => void;
   currentUser: Photographer;
 }
+
 
 const STEPS = [
   { id: 1, title: 'Upload Foto' },
@@ -22,13 +23,14 @@ export const UploadPage: React.FC<UploadPageProps> = ({
   currentUser,
 }) => {
   const [step, setStep] = useState(1);
+  const handleNext = () => setStep(s => (s < 4 ? s + 1 : s));
 
   const [title, setTitle] = useState('');
   const [caption, setCaption] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [category, setCategory] = useState<Photo['category']>('Street');
   const [aspectRatio, setAspectRatio] = useState<Photo['aspectRatio']>('portrait');
+  const [isPrivate, setIsPrivate] = useState(false);
 
   // EXIF fields
   const [camera, setCamera] = useState('Yashica Electro 35 GSN');
@@ -40,99 +42,62 @@ export const UploadPage: React.FC<UploadPageProps> = ({
   const [location, setLocation] = useState('Yogyakarta, Indonesia');
   const [tagsInput, setTagsInput] = useState('AnalogFilm, KodakGold200, Street35mm');
 
-  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
 
-  const handleNext = () => {
-    if (step === 1 && !imageUrl.trim()) {
-      alert("Harap pilih foto terlebih dahulu!");
-      return;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
     }
-    if (step === 2 && !title.trim()) {
-      alert("Harap isi judul foto!");
-      return;
-    }
-    setStep((s) => Math.min(s + 1, 4));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Prevent implicit submission via Enter key before step 4
     if (step < 4) {
       handleNext();
       return;
     }
 
     if (!title.trim() || !selectedFile) {
-      alert("Harap pilih berkas foto dan isi judul!");
+      alert("Judul dan file foto wajib diisi!");
       return;
     }
 
-    setUploading(true);
-
     try {
       const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('title', title.trim());
-      formData.append('caption', caption.trim());
-      formData.append('category', category);
-      formData.append('aspectRatio', aspectRatio);
-      formData.append('camera', camera);
-      formData.append('lens', lens);
-      formData.append('filmStock', filmStock);
-      formData.append('iso', iso);
-      formData.append('aperture', aperture);
-      formData.append('shutterSpeed', shutterSpeed);
-      formData.append('location', location);
+      formData.append("file", selectedFile);
+      formData.append("title", title);
+      formData.append("caption", caption);
+      formData.append("category", category);
+      formData.append("aspectRatio", aspectRatio);
+      formData.append("camera", camera);
+      formData.append("lens", lens);
+      formData.append("filmStock", filmStock);
+      formData.append("iso", iso);
+      formData.append("aperture", aperture);
+      formData.append("shutterSpeed", shutterSpeed);
+      formData.append("location", location);
+      formData.append("isPrivate", isPrivate ? "true" : "false");
 
-      const res = await fetch('/api/photos', {
-        method: 'POST',
+      const res = await fetch("/api/photos", {
+        method: "POST",
         body: formData,
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || 'Gagal mengunggah foto');
+        throw new Error(data.message || "Gagal mengunggah foto!");
       }
 
-      const p = data.photo;
-      const createdPhoto: Photo = {
-        id: p.id,
-        title: p.title,
-        url: p.url,
-        caption: p.caption || '',
-        photographerId: currentUser.id,
-        photographer: currentUser,
-        likesCount: p.likesCount || 0,
-        isLiked: false,
-        isBookmarked: false,
-        category: p.category as any,
-        aspectRatio: p.aspectRatio as any,
-        tags: p.tags || [],
-        createdAt: 'Baru saja',
-        exif: {
-          camera: p.camera || '-',
-          lens: p.lens || '-',
-          filmStock: p.filmStock || '-',
-          iso: p.iso || '-',
-          aperture: p.aperture || '-',
-          shutterSpeed: p.shutterSpeed || '-',
-          focalLength: '45mm',
-          location: p.location || '-',
-          dateTaken: new Date().toLocaleDateString(),
-        },
-        comments: [],
-      };
-
-      onUploadSuccess(createdPhoto);
+      onUploadSuccess(data.photo);
     } catch (err: any) {
-      alert(err.message || 'Terjadi kesalahan saat mengunggah foto.');
-    } finally {
-      setUploading(false);
+      alert(err.message);
     }
   };
-
   return (
     <div className="w-full space-y-6">
 
@@ -208,7 +173,7 @@ export const UploadPage: React.FC<UploadPageProps> = ({
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        setSelectedFile(file);
+                        setSelectedFile(file); // Store the actual file for upload
                         const reader = new FileReader();
                         reader.onload = (ev) => {
                           setImageUrl(ev.target?.result as string);
@@ -239,16 +204,53 @@ export const UploadPage: React.FC<UploadPageProps> = ({
                   </div>
                 </div>
               )}
+            </div>
+          )}
 
-              <div className="grid grid-cols-2 gap-4 mt-4">
+          {/* Step 2: Basic Info (Title, Category, Caption) */}
+          {step === 2 && (
+            <div className="space-y-4 animate-fade-in">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
+                  <label className="block font-semibold text-xs text-white mb-1.5">
+                    Judul Foto *
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Contoh: Senja di Pasar Antik"
+                    className="w-full bg-[#2C394B]/30 rounded-lg p-2.5 text-xs text-gray-100 focus:ring-2 focus:ring-[#FF4C29] focus:outline-none"
+                    required
+                  />
+                </div>
+
+                {/* Pilihan Status Privasi Foto */}
+                <div className="mt-4">
                   <label className="block text-xs font-medium text-gray-300 mb-1">
-                    Kategori Foto
+                    Status Privasi Karya Foto
+                  </label>
+                  <select
+                    value={isPrivate ? "true" : "false"}
+                    onChange={(e) => setIsPrivate(e.target.value === "true")}
+                    className="w-full px-4 py-2.5 bg-[#082032]/60 border border-[#334756] rounded-xl text-sm text-white focus:outline-none focus:border-[#FF4C29]"
+                  >
+                    <option value="false">🌐 Publik (Dapat dilihat semua orang di Feed)</option>
+                    <option value="true">🔒 Privat (Hanya saya yang bisa melihat di Profil)</option>
+                  </select>
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    *Foto privat tidak akan muncul di feed publik orang lain.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-xs text-white mb-1.5">
+                    Kategori Genre
                   </label>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as Photo['category'])}
-                    className="w-full p-2.5 bg-[#082032] border border-[#334756] rounded-xl text-xs text-white focus:outline-none focus:border-[#FF4C29]"
+                    onChange={(e) => setCategory(e.target.value as any)}
+                    className="w-full bg-[#2C394B]/30 rounded-lg p-2.5 text-xs text-gray-100 focus:ring-2 focus:ring-[#FF4C29] focus:outline-none"
                   >
                     {CATEGORIES.filter((c) => c !== 'Semua').map((cat) => (
                       <option key={cat} value={cat}>
@@ -257,53 +259,18 @@ export const UploadPage: React.FC<UploadPageProps> = ({
                     ))}
                   </select>
                 </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1">
-                    Rasio Aspek
-                  </label>
-                  <select
-                    value={aspectRatio}
-                    onChange={(e) => setAspectRatio(e.target.value as Photo['aspectRatio'])}
-                    className="w-full p-2.5 bg-[#082032] border border-[#334756] rounded-xl text-xs text-white focus:outline-none focus:border-[#FF4C29]"
-                  >
-                    <option value="portrait">Portrait (3:4)</option>
-                    <option value="landscape">Landscape (4:3)</option>
-                    <option value="square">Square (1:1)</option>
-                    <option value="tall">Tall (9:16)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Title & Story */}
-          {step === 2 && (
-            <div className="space-y-4 bg-[#2C394B]/20 p-4 sm:p-5 rounded-xl animate-fade-in">
-              <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">
-                  Judul Foto *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Contoh: Bayangan Garis Trem Sore Hari"
-                  className="w-full p-3 bg-[#082032] border border-[#334756] rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF4C29]"
-                />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">
-                  Catatan / Cerita di Balik Jepretan
+                <label className="block font-semibold text-xs text-white mb-1.5">
+                  Cerita & Catatan Fotografer (Caption)
                 </label>
                 <textarea
-                  rows={4}
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
-                  placeholder="Ceritakan momen saat foto ini diambil, suasana tempat, atau pengalaman menggulung film..."
-                  className="w-full p-3 bg-[#082032] border border-[#334756] rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#FF4C29]"
+                  rows={4}
+                  placeholder="Tuliskan latar belakang foto, nuansa emosi, tempat pencucian film, atau momen spesial saat pengambilan gambar..."
+                  className="w-full bg-[#2C394B]/30 rounded-lg p-2.5 text-xs text-gray-100 focus:ring-2 focus:ring-[#FF4C29] focus:outline-none"
                 />
               </div>
             </div>
@@ -311,147 +278,159 @@ export const UploadPage: React.FC<UploadPageProps> = ({
 
           {/* Step 3: Location & Tags */}
           {step === 3 && (
-            <div className="space-y-4 bg-[#2C394B]/20 p-4 sm:p-5 rounded-xl animate-fade-in">
-              <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1 flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-[#FF4C29]" />
-                  <span>Lokasi Pengambilan Gambar</span>
-                </label>
-                <input
-                  type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Contoh: Jl. Braga, Bandung"
-                  className="w-full p-3 bg-[#082032] border border-[#334756] rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF4C29]"
-                />
-              </div>
+            <div className="space-y-4 animate-fade-in">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="block font-semibold text-xs text-white mb-1.5 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-[#FF4C29]" />
+                    <span>Lokasi Pemotretan</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="Contoh: Kotagede, Yogyakarta"
+                    className="w-full bg-[#2C394B]/30 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-[#FF4C29] focus:outline-none"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1 flex items-center gap-1.5">
-                  <Tag className="w-3.5 h-3.5 text-[#FF4C29]" />
-                  <span>Tag (Pisahkan dengan koma)</span>
-                </label>
-                <input
-                  type="text"
-                  value={tagsInput}
-                  onChange={(e) => setTagsInput(e.target.value)}
-                  placeholder="Portra400, StreetPhotography, Bandung"
-                  className="w-full p-3 bg-[#082032] border border-[#334756] rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF4C29]"
-                />
+                <div>
+                  <label className="block font-semibold text-xs text-white mb-1.5 flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5 text-[#FF4C29]" />
+                    <span>Tag (pisahkan dengan koma)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
+                    placeholder="Contoh: Portra400, GoldenHour, Street"
+                    className="w-full bg-[#2C394B]/30 rounded-lg p-2.5 text-xs font-mono focus:ring-2 focus:ring-[#FF4C29] focus:outline-none"
+                  />
+                </div>
               </div>
             </div>
           )}
 
-          {/* Step 4: EXIF Specs */}
+          {/* Step 4: EXIF Camera & Film Specs */}
           {step === 4 && (
-            <div className="space-y-4 bg-[#2C394B]/20 p-4 sm:p-5 rounded-xl animate-fade-in">
-              <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+            <div className="bg-[#2C394B]/30 p-4 sm:p-5 rounded-xl space-y-4 animate-fade-in">
+              <h3 className="font-semibold text-xs text-white flex items-center gap-2 border-b border-[#334756]/30 pb-2">
                 <Film className="w-4 h-4 text-[#FF4C29]" />
-                <span>Metadata Kamera & Film (EXIF)</span>
+                <span>Spesifikasi EXIF Kamera & Rol Film Analog</span>
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                 <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1">Kamera</label>
+                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Kamera</label>
                   <input
                     type="text"
                     value={camera}
                     onChange={(e) => setCamera(e.target.value)}
-                    className="w-full p-2.5 bg-[#082032] border border-[#334756] rounded-xl text-xs text-white focus:outline-none focus:border-[#FF4C29]"
+                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1">Lensa</label>
+                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Lensa</label>
                   <input
                     type="text"
                     value={lens}
                     onChange={(e) => setLens(e.target.value)}
-                    className="w-full p-2.5 bg-[#082032] border border-[#334756] rounded-xl text-xs text-white focus:outline-none focus:border-[#FF4C29]"
+                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1">Rol Film</label>
+                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Rol Film (Stock)</label>
                   <select
                     value={filmStock}
                     onChange={(e) => setFilmStock(e.target.value)}
-                    className="w-full p-2.5 bg-[#082032] border border-[#334756] rounded-xl text-xs text-white focus:outline-none focus:border-[#FF4C29]"
+                    className="w-full bg-[#082032] rounded-lg p-2 text-xs font-mono focus:ring-1 focus:ring-[#FF4C29]"
                   >
-                    {POPULAR_FILM_STOCKS.filter((f) => f !== 'Semua Rol Film').map((stock) => (
-                      <option key={stock} value={stock}>
-                        {stock}
-                      </option>
+                    {POPULAR_FILM_STOCKS.filter(s => s !== 'Semua Rol Film').map(s => (
+                      <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1">ISO</label>
-                  <input
-                    type="text"
-                    value={iso}
-                    onChange={(e) => setIso(e.target.value)}
-                    className="w-full p-2.5 bg-[#082032] border border-[#334756] rounded-xl text-xs text-white focus:outline-none focus:border-[#FF4C29]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1">Aperture</label>
+                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Aperture</label>
                   <input
                     type="text"
                     value={aperture}
                     onChange={(e) => setAperture(e.target.value)}
-                    className="w-full p-2.5 bg-[#082032] border border-[#334756] rounded-xl text-xs text-white focus:outline-none focus:border-[#FF4C29]"
+                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1">Shutter Speed</label>
+                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Shutter Speed</label>
                   <input
                     type="text"
                     value={shutterSpeed}
                     onChange={(e) => setShutterSpeed(e.target.value)}
-                    className="w-full p-2.5 bg-[#082032] border border-[#334756] rounded-xl text-xs text-white focus:outline-none focus:border-[#FF4C29]"
+                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">ISO Film</label>
+                  <input
+                    type="text"
+                    value={iso}
+                    onChange={(e) => setIso(e.target.value)}
+                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
                   />
                 </div>
               </div>
             </div>
           )}
 
-          {/* Stepper Buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-[#334756]/40">
-            {step > 1 ? (
+          {/* Action Buttons Bar */}
+          <div className="pt-6 border-t border-[#334756]/30 flex items-center justify-between gap-3 mt-8">
+            {step === 1 ? (
               <button
                 type="button"
-                onClick={() => setStep((s) => Math.max(s - 1, 1))}
-                className="px-4 py-2 text-xs font-semibold text-gray-300 hover:text-white bg-[#334756]/30 hover:bg-[#334756]/60 rounded-xl transition-colors"
+                onClick={onCancel}
+                className="px-5 py-2.5 rounded-full text-white hover:bg-[#2C394B]/50 font-medium text-xs transition-colors border border-[#334756]/30"
               >
-                Kembali
-              </button>
-            ) : <div />}
-
-            {step < 4 ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                className="px-6 py-2.5 bg-[#FF4C29] hover:bg-[#ff3b14] text-white text-xs font-semibold rounded-xl transition-colors shadow-md"
-              >
-                Lanjut
+                Batal
               </button>
             ) : (
               <button
-                type="submit"
-                disabled={uploading}
-                className="px-6 py-2.5 bg-[#FF4C29] hover:bg-[#ff3b14] text-white text-xs font-semibold rounded-xl transition-colors shadow-md disabled:opacity-50"
+                type="button"
+                onClick={() => setStep((s) => s - 1)}
+                className="px-5 py-2.5 rounded-full text-white hover:bg-[#2C394B]/50 font-medium text-xs transition-colors border border-[#334756]/30 flex items-center gap-1.5"
               >
-                {uploading ? 'Mengunggah...' : 'Publikasikan Foto'}
+                <ArrowLeft className="w-3.5 h-3.5 text-[#FF4C29]" />
+                <span>Sebelumnya</span>
+              </button>
+            )}
+
+            {step < 4 ? (
+              <button
+                key="btn-next"
+                type="button"
+                onClick={handleNext}
+                className="px-6 py-2.5 rounded-full bg-[#FF4C29] text-white font-semibold text-xs hover:bg-[#334756] shadow-md transition-all transform hover:-translate-y-0.5"
+              >
+                Selanjutnya
+              </button>
+            ) : (
+              <button
+                key="btn-submit"
+                type="submit"
+                className="px-6 py-2.5 rounded-full bg-[#FF4C29] text-white font-semibold text-xs hover:bg-[#334756] shadow-md flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+              >
+                <Upload className="w-4 h-4 text-[#FF4C29]" />
+                <span>Publikasikan Karya</span>
               </button>
             )}
           </div>
 
         </form>
       </div>
+
     </div>
   );
 };

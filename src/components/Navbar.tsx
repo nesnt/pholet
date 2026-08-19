@@ -101,11 +101,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onViewChange('profile')}
                 className="flex items-center gap-2 hover:bg-[#334756]/30 p-1.5 pr-4 rounded-full transition-colors group border border-transparent hover:border-[#334756]/50"
               >
-                <img
-                  src={userAvatar}
-                  alt={userName}
-                  className="w-9 h-9 rounded-full object-cover border border-[#334756] group-hover:border-[#2C394B]"
-                />
+                {userAvatar ? (
+                  <img
+                    src={userAvatar}
+                    alt={userName}
+                    className="w-9 h-9 rounded-full object-cover border border-[#334756] group-hover:border-[#2C394B]"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-[#334756] border border-[#334756] group-hover:border-[#2C394B] flex items-center justify-center">
+                    <User className="w-5 h-5 text-gray-400" />
+                  </div>
+                )}
                 <div className="text-left hidden lg:block">
                   <span className="block text-sm font-semibold text-white leading-tight truncate max-w-[120px]">
                     {userName}

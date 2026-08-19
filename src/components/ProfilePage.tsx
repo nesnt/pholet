@@ -43,11 +43,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
         
         {/* Banner Cover with Smooth Gradient to #F8F4E8 */}
         <div className="h-48 sm:h-64 lg:h-72 w-full relative bg-[#082032]">
-          <img
-            src={photographer.bannerUrl}
-            alt="Banner"
-            className="w-full h-full object-cover opacity-90"
-          />
+          {photographer.bannerUrl && (
+            <img
+              src={photographer.bannerUrl}
+              alt="Banner"
+              className="w-full h-full object-cover opacity-90"
+            />
+          )}
           {/* Top subtle dark vignette for contrast + Bottom smooth transition to #F8F4E8 */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-[#F8F4E8]" />
         </div>
@@ -60,7 +62,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             {/* Avatar & Main Info */}
             <div className="flex items-end gap-4">
               <img
-                src={photographer.avatar}
+                src={photographer.avatar || undefined}
                 alt={photographer.name}
                 className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover border-4 border-[#F8F4E8] shadow-lg bg-[#2C394B]"
               />

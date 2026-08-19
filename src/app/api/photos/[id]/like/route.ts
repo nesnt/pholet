@@ -1,16 +1,18 @@
+// src/app/api/photos/[id]/like/route.ts
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
+// POST: Tambah Like (+1) tanpa batas
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: photoId } = await params;
+    const { id } = await params;
 
-    // Increment likesCount di database (+1) sesuai kriteria like tanpa batas
+    // Tambah nilai likesCount sebesar +1 di PostgreSQL
     const updatedPhoto = await db.photo.update({
-      where: { id: photoId },
+      where: { id },
       data: {
         likesCount: {
           increment: 1,
@@ -19,14 +21,11 @@ export async function POST(
     });
 
     return NextResponse.json({
-      message: "Like berhasil ditambahkan!",
+      message: "Like ditambahkan!",
       likesCount: updatedPhoto.likesCount,
     });
   } catch (error) {
-    console.error("Like Photo Error:", error);
-    return NextResponse.json(
-      { message: "Gagal memperbarui Like foto" },
-      { status: 500 }
-    );
+    console.error("Like Error:", error);
+    return NextResponse.json({ message: "Gagal menyukai foto" }, { status: 500 });
   }
 }
