@@ -5,9 +5,9 @@ import { db } from "@/lib/db";
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { username, password, name } = body;
+        const { email, password, name } = body;
 
-        if (!username || !password || !name) {
+        if (!email || !password || !name) {
             return NextResponse.json(
                 { message: "mohon isi semua data input yang di minta" },
                 { status: 400 }
@@ -15,12 +15,12 @@ export async function POST(req: Request) {
         }
 
         const existingUser = await db.user.findUnique({
-            where: { username },
+            where: { email },
         });
 
         if (existingUser) {
             return NextResponse.json(
-                { message: "username or email is already been taken" },
+                { message: "email is already been taken" },
                 { status: 400 }
             )
         }
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
         const newUser = await db.user.create({
             data: {
-                username,
+                email,
                 name,
                 password: hashedPassword,
             }
@@ -39,8 +39,8 @@ export async function POST(req: Request) {
             {
                 message: "Register is Complete",
                 user: {
-                    ud: newUser.id,
-                    username: newUser.username,
+                    id: newUser.id,
+                    email: newUser.email,
                     name: newUser.name,
                 },
             },

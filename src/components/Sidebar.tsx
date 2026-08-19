@@ -17,21 +17,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState<boolean>(false);
 
-  const menuItems = [
+  const menuItems: Array<{ id: ViewMode; label: string; icon: React.ElementType; description: string; avatar?: string; badge?: string }> = [
     {
-      id: 'feed' as ViewMode,
+      id: 'feed',
       label: 'Galeri Feed',
       icon: Compass,
       description: 'Jelajahi foto analog',
     },
     {
-      id: 'my-photos' as ViewMode,
+      id: 'my-photos',
       label: 'Foto Saya',
       icon: ImageIcon,
       description: 'Koleksi foto pribadi',
     },
     {
-      id: 'my-albums' as ViewMode,
+      id: 'my-albums',
       label: 'Album Saya',
       icon: Library,
       description: 'Kumpulan album roll film',

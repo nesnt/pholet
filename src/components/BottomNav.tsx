@@ -8,10 +8,10 @@ interface BottomNavProps {
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ currentView, onViewChange }) => {
-  const navItems = [
-    { id: 'feed' as ViewMode, label: 'Galeri', icon: Compass },
-    { id: 'my-photos' as ViewMode, label: 'Foto Saya', icon: ImageIcon },
-    { id: 'profile' as ViewMode, label: 'Profil', icon: User },
+  const navItems: Array<{ id: ViewMode; label: string; icon: React.ElementType; isAction?: boolean }> = [
+    { id: 'feed', label: 'Galeri', icon: Compass },
+    { id: 'my-photos', label: 'Foto Saya', icon: ImageIcon },
+    { id: 'profile', label: 'Profil', icon: User },
   ];
 
   return (

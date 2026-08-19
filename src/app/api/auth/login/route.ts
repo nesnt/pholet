@@ -5,9 +5,9 @@ import { db } from "@/lib/db";
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { username, password } = body;
+        const { email, password } = body;
 
-        if (!username || !password) {
+        if (!email || !password) {
             return NextResponse.json(
                 { message: "please fill all required data!" },
                 { status: 400 }
@@ -15,12 +15,12 @@ export async function POST(req: Request) {
         }
 
         const user = await db.user.findUnique({
-            where: { username },
+            where: { email },
         })
 
         if (!user) {
             return NextResponse.json(
-                { message: "username or password is wrong" },
+                { message: "email or password is wrong" },
                 { status: 400 }
             )
         }
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
         if (!passwordValid) {
             return NextResponse.json(
-                { message: "username or password is wrong" },
+                { message: "email or password is wrong" },
                 { status: 400 }
             )
         }
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
             message: "login succes",
             user: {
                 id: user.id,
-                username: user.username,
+                email: user.email,
                 name: user.name,
                 avatar: user.avatar,
                 bio: user.bio
