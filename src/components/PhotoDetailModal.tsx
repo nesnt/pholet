@@ -259,7 +259,7 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                 </div>
               )}
             </div>
-
+a
             {/* Like & Action Bar */}
             <div className="flex items-center justify-between py-2 border-y border-[#334756]/20">
               <div className="flex items-center gap-3">

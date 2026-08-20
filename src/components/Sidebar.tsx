@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Compass, BookOpen, Plus, Film, Image as ImageIcon, Library, Settings } from 'lucide-react';
+import { Compass, BookOpen, Plus, Film, User, Settings } from 'lucide-react';
 import { ViewMode } from '../types';
 
 interface SidebarProps {
@@ -25,16 +25,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       description: 'Jelajahi foto analog',
     },
     {
-      id: 'my-photos',
-      label: 'Foto Saya',
-      icon: ImageIcon,
-      description: 'Koleksi foto pribadi',
-    },
-    {
-      id: 'my-albums',
-      label: 'Album Saya',
-      icon: Library,
-      description: 'Kumpulan album roll film',
+      id: 'profile',
+      label: 'Profil Saya',
+      icon: User,
+      description: 'Halaman profil Anda',
+      avatar: userAvatar,
     },
   ];
 

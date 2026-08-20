@@ -65,7 +65,7 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({
               ))}
             </div>
             {/* Horizontal Scroll Fade Indicator */}
-            <div className="absolute top-0 right-0 bottom-1 w-12 bg-gradient-to-l from-[#E4D6A9]/80 to-transparent pointer-events-none rounded-r-2xl" />
+            <div className="absolute top-0 right-0 bottom-1 w-12 bg-gradient-to-l from-[#162A3C] to-[#162A3C]/0 pointer-events-none rounded-r-2xl" />
           </div>
 
           {/* Layout Mode Toggles */}

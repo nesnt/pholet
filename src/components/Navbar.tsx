@@ -5,8 +5,6 @@ import {
   Plus,
   Compass,
   User,
-  Image as ImageIcon,
-  Library,
   Menu,
   X,
   Settings,
@@ -200,25 +198,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Galeri</span>
           </button>
 
-          <button
-            onClick={() => { onViewChange('my-photos'); setIsMobileMenuOpen(false); }}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-              currentView === 'my-photos' ? 'bg-[#2C394B] text-white' : 'text-white hover:bg-[#334756]/30'
-            }`}
-          >
-            <ImageIcon className="w-5 h-5 text-[#FF4C29]" />
-            <span>Foto Saya</span>
-          </button>
 
-          <button
-            onClick={() => { onViewChange('my-albums'); setIsMobileMenuOpen(false); }}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-              currentView === 'my-albums' ? 'bg-[#2C394B] text-white' : 'text-white hover:bg-[#334756]/30'
-            }`}
-          >
-            <Library className="w-5 h-5 text-[#FF4C29]" />
-            <span>Album</span>
-          </button>
 
           <button
             onClick={() => { onViewChange('profile'); setIsMobileMenuOpen(false); }}

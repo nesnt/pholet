@@ -537,52 +537,7 @@ export default function Home() {
 
 
 
-        {/* My Albums View */}
-        {currentView === 'my-albums' && (
-          <div className="flex flex-col items-center justify-center py-32 text-white space-y-4">
-            <div className="w-16 h-16 bg-[#2C394B] rounded-full flex items-center justify-center shadow-inner">
-              <Film className="w-8 h-8 text-[#FF4C29]" />
-            </div>
-            <h2 className="font-serif-display text-2xl font-bold">Album Saya</h2>
-            <p className="text-gray-400 text-sm max-w-md text-center">
-              Fitur album sedang dalam pengembangan. Nantinya Anda bisa mengelompokkan foto-foto roll film Anda di sini.
-            </p>
-          </div>
-        )}
 
-        {/* My Photos View */}
-        {currentView === 'my-photos' && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 border-b border-[#334756]/30 pb-4 mb-6">
-              <div className="w-10 h-10 bg-[#2C394B] rounded-full flex items-center justify-center border border-[#334756]/30">
-                <ImageIcon className="w-5 h-5 text-[#FF4C29]" />
-              </div>
-              <div>
-                <h2 className="font-serif-display text-2xl font-bold text-white">Foto Saya</h2>
-                <p className="text-xs text-gray-400">Koleksi semua foto yang telah Anda unggah</p>
-              </div>
-            </div>
-            
-            {photos.filter(p => p.photographerId === currentUser.id).length === 0 ? (
-               <div className="bg-[#082032] border border-[#334756]/30 rounded-2xl p-12 text-center space-y-3 my-8">
-                 <p className="text-sm text-gray-400">Anda belum mengunggah foto satupun.</p>
-               </div>
-            ) : (
-               <PhotoGrid
-                 photos={filteredPhotos.filter(p => p.photographerId === currentUser.id)}
-                 selectedCategory={selectedCategory}
-                 onCategorySelect={setSelectedCategory}
-                 selectedFilmStock={selectedFilmStock}
-                 onFilmStockSelect={setSelectedFilmStock}
-                 onLikeToggle={handleLikeToggle}
-                 onBookmarkToggle={handleBookmarkToggle}
-                 onClickPhoto={(photo) => setActivePhotoDetail(photo)}
-                 onClickPhotographer={handleSelectPhotographer}
-                 isLoading={isGridLoading}
-               />
-            )}
-          </div>
-        )}
 
         {/* Upload Page View */}
         {currentView === 'upload' && (
@@ -595,7 +550,17 @@ export default function Home() {
 
         {/* Settings View */}
         {currentView === 'settings' && (
-          <SettingsView />
+          <SettingsView 
+            currentUser={currentUser} 
+            onUpdateSuccess={(updatedUser) => {
+              setCurrentUser((prev) => prev ? { ...prev, ...updatedUser } : prev);
+              
+              // Also update photographers array if the current user is in it
+              setPhotographers((prev) => 
+                prev.map((p) => p.id === currentUser.id ? { ...p, ...updatedUser } : p)
+              );
+            }} 
+          />
         )}
 
           </main>
