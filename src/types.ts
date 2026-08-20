@@ -45,6 +45,7 @@ export interface Photo {
   likesCount: number;
   isLiked: boolean;
   isBookmarked?: boolean;
+  isPrivate?: boolean;
   comments: Comment[];
   exif: EXIFInfo;
   tags: string[];

@@ -39,17 +39,17 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     <div className="space-y-6">
       
       {/* Profile Header Container - Full Screen Width */}
-      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#F8F4E8] border-y border-[#978F66]/30 shadow-sm -mt-6 mb-8">
+      <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen bg-[#082032] border-y border-[#334756]/30 shadow-sm -mt-6 mb-8">
         
-        {/* Banner Cover with Smooth Gradient to #F8F4E8 */}
-        <div className="h-48 sm:h-64 lg:h-72 w-full relative bg-[#21120B]">
+        {/* Banner Cover with Smooth Gradient to background color */}
+        <div className="h-48 sm:h-64 lg:h-72 w-full relative bg-[#082032]">
           <img
             src={photographer.bannerUrl}
             alt="Banner"
             className="w-full h-full object-cover opacity-90"
           />
-          {/* Top subtle dark vignette for contrast + Bottom smooth transition to #F8F4E8 */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-[#F8F4E8]" />
+          {/* Top subtle dark vignette for contrast + Bottom smooth transition to background */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-[#082032]" />
         </div>
 
         {/* Profile Details Bar */}
@@ -62,7 +62,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <img
                 src={photographer.avatar}
                 alt={photographer.name}
-                className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover border-4 border-[#F8F4E8] shadow-lg bg-[#E4D6A9]"
+                className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover border-4 border-[#082032] shadow-lg bg-[#2C394B]"
               />
               <div className="mb-1">
                 <h1 className="font-serif-display text-xl sm:text-2xl font-bold text-[#622B14]">
@@ -139,20 +139,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               <span className="font-bold text-sm block">{myPhotos.length}</span>
               <span className="text-[10px] text-[#978F66] uppercase tracking-wider font-semibold">
                 Karya Foto
-              </span>
-            </div>
-            <div className="w-px h-8 bg-[#978F66]/30" />
-            <div>
-              <span className="font-bold text-sm block">{photographer.followersCount}</span>
-              <span className="text-[10px] text-[#978F66] uppercase tracking-wider font-semibold">
-                Pengikut
-              </span>
-            </div>
-            <div className="w-px h-8 bg-[#978F66]/30" />
-            <div>
-              <span className="font-bold text-sm block">{photographer.followingCount}</span>
-              <span className="text-[10px] text-[#978F66] uppercase tracking-wider font-semibold">
-                Mengikuti
               </span>
             </div>
             <div className="w-px h-8 bg-[#978F66]/30" />

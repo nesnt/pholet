@@ -2,15 +2,12 @@ import React, { useState } from 'react';
 import { 
   X, 
   Heart, 
-  MessageCircle, 
-  Bookmark, 
   Camera, 
   Film, 
   MapPin, 
   Calendar, 
   Share2, 
   Maximize2, 
-  Send, 
   Aperture, 
   Info,
   Check
@@ -21,9 +18,9 @@ interface PhotoDetailModalProps {
   photo: Photo | null;
   onClose: () => void;
   onLikeToggle: (photoId: string) => void;
-  onBookmarkToggle: (photoId: string) => void;
-  onAddComment: (photoId: string, commentText: string) => void;
-  onToggleFollowPhotographer: (photographerId: string) => void;
+  onBookmarkToggle?: (photoId: string) => void;
+  onAddComment?: (photoId: string, commentText: string) => void;
+  onToggleFollowPhotographer?: (photographerId: string) => void;
   onSelectPhotographer: (photographerId: string) => void;
 }
 
@@ -36,7 +33,6 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
   onToggleFollowPhotographer,
   onSelectPhotographer,
 }) => {
-  const [commentText, setCommentText] = useState('');
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
   const [isLightbox, setIsLightbox] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -49,13 +45,6 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
     setTimeout(() => {
       setIsLikingAnimation(false);
     }, 450);
-  };
-
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!commentText.trim()) return;
-    onAddComment(photo.id, commentText.trim());
-    setCommentText('');
   };
 
   const handleCopyLink = () => {
@@ -149,17 +138,6 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                   </p>
                 </div>
               </button>
-
-              <button
-                onClick={() => onToggleFollowPhotographer(photo.photographer.id)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                  photo.photographer.isFollowing
-                    ? 'bg-[#E4D6A9] text-[#622B14] border border-[#978F66]/40 hover:bg-rose-100 hover:text-rose-700'
-                    : 'bg-[#622B14] text-[#E4D6A9] hover:bg-[#995F2F]'
-                }`}
-              >
-                {photo.photographer.isFollowing ? 'Mengikuti' : '+ Ikuti'}
-              </button>
             </div>
 
             {/* Photo Title & Caption */}
@@ -246,19 +224,6 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                   />
                   <span>{photo.likesCount} Suka</span>
                 </button>
-
-                {/* Bookmark Button */}
-                <button
-                  onClick={() => onBookmarkToggle(photo.id)}
-                  className={`p-2 rounded-full border transition-colors ${
-                    photo.isBookmarked
-                      ? 'bg-[#995F2F] text-[#E4D6A9] border-[#995F2F]'
-                      : 'border-[#978F66]/40 text-[#622B14] hover:bg-[#E4D6A9]/50'
-                  }`}
-                  title={photo.isBookmarked ? 'Tersimpan' : 'Simpan Foto'}
-                >
-                  <Bookmark className={`w-4 h-4 ${photo.isBookmarked ? 'fill-[#E4D6A9]' : ''}`} />
-                </button>
               </div>
 
               {/* Share Link Button */}
@@ -280,62 +245,7 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
               </button>
             </div>
 
-            {/* Comments List Section */}
-            <div className="space-y-3">
-              <h4 className="font-serif-display text-sm font-semibold text-[#622B14] flex items-center gap-1.5">
-                <MessageCircle className="w-4 h-4 text-[#995F2F]" />
-                <span>Komentar Komunitas ({photo.comments.length})</span>
-              </h4>
-
-              <div className="max-h-48 overflow-y-auto space-y-2.5 pr-1">
-                {photo.comments.length === 0 ? (
-                  <p className="text-xs text-[#978F66] italic bg-[#E4D6A9]/20 p-3 rounded-lg text-center">
-                    Belum ada komentar. Jadilah fotografer pertama yang meninggalkan apresiasi!
-                  </p>
-                ) : (
-                  photo.comments.map((comment) => (
-                    <div key={comment.id} className="bg-[#E4D6A9]/30 border border-[#978F66]/20 p-2.5 rounded-lg text-xs">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-semibold text-[#622B14] flex items-center gap-1.5">
-                          <img
-                            src={comment.userAvatar}
-                            alt={comment.userName}
-                            className="w-5 h-5 rounded-full object-cover border border-[#978F66]"
-                          />
-                          {comment.userName}
-                        </span>
-                        <span className="text-[10px] text-[#978F66]">
-                          {comment.createdAt}
-                        </span>
-                      </div>
-                      <p className="text-[#21120B] text-xs pl-6">
-                        {comment.text}
-                      </p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
           </div>
-
-          {/* Comment Input Form */}
-          <form onSubmit={handleCommentSubmit} className="mt-4 pt-3 border-t border-[#978F66]/30 flex items-center gap-2">
-            <input
-              type="text"
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Tuliskan apresiasi atau pertanyaan..."
-              className="flex-1 bg-[#21120B]/5 border border-[#978F66]/40 rounded-full px-3.5 py-2 text-xs text-[#21120B] placeholder-[#978F66] focus:outline-none focus:ring-1 focus:ring-[#622B14]"
-            />
-            <button
-              type="submit"
-              disabled={!commentText.trim()}
-              className="p-2 rounded-full bg-[#622B14] text-[#E4D6A9] hover:bg-[#995F2F] disabled:opacity-50 disabled:hover:bg-[#622B14] transition-colors"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </form>
 
         </div>
 

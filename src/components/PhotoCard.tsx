@@ -58,6 +58,12 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({
     >
       {/* Main Image Area */}
       <div className={`relative w-full ${getAspectClass()} overflow-hidden select-none`}>
+      {/* Badge Status Privat (Hanya muncul jika foto bersifat Privat) */}
+        {photo.isPrivate && (
+          <div className="absolute top-3 left-3 z-20 px-2.5 py-1 bg-black/70 backdrop-blur-md border border-[#FF4C29]/40 text-[11px] font-semibold text-amber-300 rounded-full flex items-center gap-1 shadow-md">
+            🔒 Privat
+          </div>
+        )}
         {!imageLoaded && (
           <div className="absolute inset-0 bg-gradient-to-r from-[#E4D6A9]/20 via-[#978F66]/20 to-[#E4D6A9]/20 animate-pulse" />
         )}

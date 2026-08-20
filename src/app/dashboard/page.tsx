@@ -105,6 +105,7 @@ export default function Home() {
             title: p.title,
             caption: p.caption,
             url: p.url,
+            isPrivate: p.isPrivate || false,
             likesCount: p.likesCount,
             category: p.category,
             aspectRatio: p.aspectRatio,
@@ -190,18 +191,39 @@ export default function Home() {
     }
   };
 
+    // Fungsi Logout Akun
+  const handleLogout = async () => {
+    if (confirm("Apakah Anda yakin ingin keluar dari akun ini?")) {
+      try {
+        await fetch("/api/auth/logout", { method: "POST" });
+        // Redirect ke halaman login setelah logout
+        window.location.href = "/login";
+      } catch (err) {
+        console.error("Logout Error:", err);
+      }
+    }
+  };
+
+  // Filtered Photos List
   // Filtered Photos List
   const filteredPhotos = useMemo(() => {
     return photos.filter((photo) => {
-      // Category match
+      // 1. Jika di tampilan Feed Utama, SEMBUNYIKAN semua foto privat!
+      if (currentView === 'feed' && photo.isPrivate) {
+        return false;
+      }
+
+      // 2. Filter Kategori
       if (selectedCategory !== 'Semua' && photo.category !== selectedCategory) {
         return false;
       }
-      // Film stock match
+
+      // 3. Filter Rol Film
       if (selectedFilmStock !== 'Semua Rol Film' && photo.exif.filmStock !== selectedFilmStock) {
         return false;
       }
-      // Search query match
+
+      // 4. Filter Pencarian Search Query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchesTitle = photo.title.toLowerCase().includes(query);
@@ -222,9 +244,10 @@ export default function Home() {
           matchesTag
         );
       }
+
       return true;
     });
-  }, [photos, selectedCategory, selectedFilmStock, searchQuery]);
+  }, [photos, selectedCategory, selectedFilmStock, searchQuery, currentView]);
 
   const handleBookmarkToggle = (photoId: string) => {
     let isNowBookmarked = false;
@@ -322,6 +345,7 @@ export default function Home() {
       title: rawPhoto.title,
       caption: rawPhoto.caption,
       url: rawPhoto.url,
+      isPrivate: rawPhoto.isPrivate || false,
       likesCount: rawPhoto.likesCount || 0,
       category: rawPhoto.category,
       aspectRatio: rawPhoto.aspectRatio,
@@ -400,6 +424,7 @@ export default function Home() {
         onOpenUpload={() => setCurrentView('upload')}
         userAvatar={currentUser.avatar}
         userName={currentUser.name}
+        onLogout={handleLogout}
       />
 
       {/* Mobile Bottom Navigation */}

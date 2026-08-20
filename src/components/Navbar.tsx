@@ -9,7 +9,8 @@ import {
   Library,
   Menu,
   X,
-  Settings
+  Settings,
+  LogOut
 } from 'lucide-react';
 import { ViewMode } from '../types';
 
@@ -21,6 +22,7 @@ interface NavbarProps {
   onOpenUpload: () => void;
   userAvatar: string;
   userName: string;
+  onLogout: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -31,6 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenUpload,
   userAvatar,
   userName,
+  onLogout,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -96,7 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {/* Right: Account Profile (Desktop) */}
-            <div className="hidden md:flex items-center shrink-0 z-10">
+            <div className="hidden md:flex items-center gap-4 shrink-0 z-10">
               <button
                 onClick={() => onViewChange('profile')}
                 className="flex items-center gap-2 hover:bg-[#334756]/30 p-1.5 pr-4 rounded-full transition-colors group border border-transparent hover:border-[#334756]/50"
@@ -118,6 +121,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </span>
                   <span className="block text-[10px] text-gray-400">Lihat Profil</span>
                 </div>
+              </button>
+
+              <button
+                onClick={onLogout}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-400 hover:text-red-300 border border-red-500/30 hover:border-red-500/60 hover:bg-red-500/10 rounded-full transition-all"
+                title="Keluar Akun"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden xl:inline font-medium">Keluar</span>
               </button>
             </div>
 
@@ -221,6 +233,15 @@ export const Navbar: React.FC<NavbarProps> = ({
         
         {/* Settings button at the bottom of the drawer */}
         <div className="mt-auto p-4 border-t border-[#334756]/40">
+          {/* Tombol Logout */}
+          <button
+            onClick={onLogout}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-400 hover:text-red-300 border border-red-500/30 hover:border-red-500/60 hover:bg-red-500/10 rounded-full transition-all"
+            title="Keluar Akun"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Keluar</span>
+          </button>
           <button
             onClick={() => { onViewChange('settings'); setIsMobileMenuOpen(false); }}
             className={`flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm font-medium transition-colors ${
