@@ -10,7 +10,6 @@ interface BottomNavProps {
 export const BottomNav: React.FC<BottomNavProps> = ({ currentView, onViewChange }) => {
   const navItems: Array<{ id: ViewMode; label: string; icon: React.ElementType; isAction?: boolean }> = [
     { id: 'feed', label: 'Galeri', icon: Compass },
-    { id: 'my-photos', label: 'Foto Saya', icon: ImageIcon },
     { id: 'profile', label: 'Profil', icon: User },
   ];
 
