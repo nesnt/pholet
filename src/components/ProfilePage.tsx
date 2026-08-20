@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Photographer, Photo } from '../types';
 import { PhotoCard } from './PhotoCard';
-import { MapPin, Globe, Camera, Film, Heart, Grid, Bookmark, UserCheck, UserPlus, Edit3 } from 'lucide-react';
+import { MapPin, Globe, Camera, Film, Heart, Grid, Bookmark, UserCheck, UserPlus, Edit3, User } from 'lucide-react';
 
 interface ProfilePageProps {
   photographer: Photographer;
@@ -61,11 +61,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             
             {/* Avatar & Main Info */}
             <div className="flex items-end gap-4">
-              <img
-                src={photographer.avatar || undefined}
-                alt={photographer.name}
-                className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover border-4 border-[#082032] shadow-lg bg-[#2C394B]"
-              />
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl border-4 border-[#082032] shadow-lg bg-[#2C394B] flex items-center justify-center shrink-0">
+                <User className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400" />
+              </div>
               <div className="mb-1">
                 <h1 className="font-serif-display text-xl sm:text-2xl font-bold text-white">
                   {photographer.name}

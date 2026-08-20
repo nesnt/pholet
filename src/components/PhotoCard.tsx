@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Bookmark, Camera, Film, MapPin, Share2 } from 'lucide-react';
+import { Heart, MessageCircle, Bookmark, Camera, Film, MapPin, Share2, User } from 'lucide-react';
 import { Photo } from '../types';
 
 interface PhotoCardProps {
@@ -90,11 +90,9 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({
             }}
             className="flex items-center gap-2.5 text-left group/user hover:opacity-90 transition-opacity"
           >
-            <img
-              src={photo.photographer.avatar || undefined}
-              alt={photo.photographer.name}
-              className="w-8 h-8 rounded-full object-cover border border-white/30 group-hover/user:border-[#FF4C29] transition-colors"
-            />
+            <div className="w-8 h-8 rounded-full border border-white/30 group-hover/user:border-[#FF4C29] transition-colors bg-[#2C394B]/80 flex items-center justify-center shrink-0 backdrop-blur-sm shadow-sm">
+              <User className="w-4 h-4 text-gray-300" />
+            </div>
             <div>
               <h4 className="text-xs font-semibold text-white line-clamp-1 group-hover/user:underline drop-shadow-md">
                 {photo.photographer.name}
