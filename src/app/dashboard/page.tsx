@@ -387,6 +387,25 @@ export default function Home() {
     showToast('Karya foto berhasil diunggah!', 'success');
   };
 
+  const handleEditSuccess = (updatedPhoto: Photo) => {
+    // Update active photo detail
+    if (activePhotoDetail?.id === updatedPhoto.id) {
+      setActivePhotoDetail(updatedPhoto);
+    }
+    // Update photos list
+    setPhotos((prev) => 
+      prev.map(p => p.id === updatedPhoto.id ? updatedPhoto : p)
+    );
+  };
+
+  const handleDeleteSuccess = (photoId: string) => {
+    // Close modal
+    setActivePhotoDetail(null);
+    // Remove from state
+    setPhotos((prev) => prev.filter((p) => p.id !== photoId));
+    showToast('Karya foto berhasil dihapus', 'success');
+  };
+
   const handleSelectPhotographer = (photographerId: string) => {
     setSelectedPhotographerId(photographerId);
     setCurrentView('profile');
@@ -622,6 +641,9 @@ export default function Home() {
           onAddComment={handleAddComment}
           onToggleFollowPhotographer={handleToggleFollowPhotographer}
           onSelectPhotographer={handleSelectPhotographer}
+          onEditSuccess={handleEditSuccess}
+          onDeleteSuccess={handleDeleteSuccess}
+          showEditButton={currentView === 'profile' && activePhotoDetail.photographerId === currentUser.id}
         />
       )}
 

@@ -11,9 +11,12 @@ import {
   Maximize2, 
   Aperture, 
   Info,
-  Check
+  Check,
+  Edit3,
+  Trash2
 } from 'lucide-react';
 import { Photo, Photographer } from '../types';
+import { EditPhotoModal } from './EditPhotoModal';
 
 interface PhotoDetailModalProps {
   photo: Photo | null;
@@ -23,6 +26,9 @@ interface PhotoDetailModalProps {
   onAddComment?: (photoId: string, commentText: string) => void;
   onToggleFollowPhotographer?: (photographerId: string) => void;
   onSelectPhotographer: (photographerId: string) => void;
+  onEditSuccess?: (updatedPhoto: Photo) => void;
+  onDeleteSuccess?: (photoId: string) => void;
+  showEditButton?: boolean;
 }
 
 export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
@@ -33,10 +39,15 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
   onAddComment,
   onToggleFollowPhotographer,
   onSelectPhotographer,
+  onEditSuccess,
+  onDeleteSuccess,
+  showEditButton = false,
 }) => {
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
   const [isLightbox, setIsLightbox] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   if (!photo) return null;
 
@@ -52,6 +63,32 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
     navigator.clipboard.writeText(window.location.href);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const handleDeleteClick = async () => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus karya foto ini? Tindakan ini tidak dapat dibatalkan.')) {
+      return;
+    }
+    
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/photos/${photo.id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || 'Gagal menghapus foto');
+      }
+      
+      alert('Foto berhasil dihapus!');
+      if (onDeleteSuccess) {
+        onDeleteSuccess(photo.id);
+      }
+      onClose();
+    } catch (err: any) {
+      alert(err.message || 'Terjadi kesalahan saat menghapus foto');
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -244,32 +281,63 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                 </button>
               </div>
 
-              {/* Share Link Button */}
-              <button
-                onClick={handleCopyLink}
-                className="px-3 py-1.5 rounded-full text-xs text-white bg-[#2C394B]/60 border border-[#334756]/30 hover:bg-[#2C394B] flex items-center gap-1.5 transition-colors"
-              >
-                {copiedLink ? (
+              {/* Actions & Share */}
+              <div className="flex items-center gap-2">
+                {showEditButton && (
                   <>
-                    <Check className="w-3.5 h-3.5 text-[#FF4C29]" />
-                    <span className="text-emerald-800 font-semibold">Tersalin!</span>
-                  </>
-                ) : (
-                  <>
-                    <Share2 className="w-3.5 h-3.5 text-[#FF4C29]" />
-                    <span>Bagikan</span>
+                    <button
+                      onClick={() => setIsEditModalOpen(true)}
+                      className="px-3 py-1.5 text-xs bg-[#FF4C29]/20 hover:bg-[#FF4C29]/40 text-[#FF4C29] border border-[#FF4C29]/40 rounded-lg transition-colors flex items-center gap-1"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Edit</span>
+                    </button>
+                    <button
+                      onClick={handleDeleteClick}
+                      disabled={isDeleting}
+                      className="px-3 py-1.5 text-xs bg-red-500/10 hover:bg-red-500/30 text-red-500 border border-red-500/30 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">{isDeleting ? '...' : 'Hapus'}</span>
+                    </button>
                   </>
                 )}
-              </button>
+                <button
+                  onClick={handleCopyLink}
+                  className="px-3 py-1.5 rounded-full text-xs text-white bg-[#2C394B]/60 border border-[#334756]/30 hover:bg-[#2C394B] flex items-center gap-1.5 transition-colors"
+                >
+                  {copiedLink ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-500" />
+                      <span className="text-emerald-500 font-semibold hidden sm:inline">Tersalin!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-3.5 h-3.5 text-gray-300" />
+                      <span className="hidden sm:inline">Bagikan</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
           </div>
 
         </div>
-
         </div>
 
       </motion.div>
+
+      {/* Render Edit Photo Modal */}
+      <EditPhotoModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        photo={photo}
+        onEditSuccess={(updatedPhoto) => {
+          setIsEditModalOpen(false);
+          if (onEditSuccess) onEditSuccess(updatedPhoto);
+        }}
+      />
     </div>
   );
 };

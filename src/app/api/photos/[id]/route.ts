@@ -52,6 +52,7 @@ export async function DELETE(
 }
 
 // 2. PATCH: Edit Foto (Judul & Caption)
+// 2. PATCH: Edit Foto (Judul, Caption, Kategori, & Privasi)
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -66,7 +67,7 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const { title, caption } = body;
+    const { title, caption, category, isPrivate } = body;
 
     const photo = await db.photo.findUnique({ where: { id } });
     if (!photo) {
@@ -79,7 +80,12 @@ export async function PATCH(
 
     const updatedPhoto = await db.photo.update({
       where: { id },
-      data: { title, caption },
+      data: {
+        ...(title !== undefined && { title }),
+        ...(caption !== undefined && { caption }),
+        ...(category !== undefined && { category }),
+        ...(isPrivate !== undefined && { isPrivate }),
+      },
     });
 
     return NextResponse.json({ message: "Foto berhasil diperbarui!", photo: updatedPhoto });
