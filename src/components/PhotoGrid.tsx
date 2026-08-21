@@ -127,7 +127,7 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({
 
       {/* Loading Skeleton */}
       {isLoading ? (
-        <div className={layoutMode === 'masonry' ? "columns-[280px] sm:columns-[320px] lg:columns-[340px] gap-4 sm:gap-6 [column-fill:_balance]" : "grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-4 sm:gap-6"}>
+        <div style={layoutMode === 'masonry' ? { columnWidth: '200px', columnGap: '1.5rem' } : { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem' }} className={layoutMode === 'masonry' ? "[column-fill:_balance]" : ""}>
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className={`mb-4 sm:mb-6 break-inside-avoid bg-[#082032] rounded-2xl border border-[#334756]/30 overflow-hidden ${layoutMode === 'grid' ? 'aspect-square' : 'min-h-[300px]'}`}>
               <div className="p-3 bg-[#2C394B]/30 border-b border-[#334756]/20 flex items-center gap-2.5">
@@ -168,7 +168,7 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({
         </div>
       ) : layoutMode === 'masonry' ? (
         /* Masonry Columns View (Pinterest style) */
-        <div className="columns-[280px] sm:columns-[320px] lg:columns-[340px] gap-4 sm:gap-6 [column-fill:_balance]">
+        <div style={{ columnWidth: '200px', columnGap: '1.5rem' }} className="[column-fill:_balance]">
           {photos.map((photo) => (
             <div key={photo.id} className="break-inside-avoid mb-4 sm:mb-6">
               <PhotoCard
@@ -183,7 +183,7 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({
         </div>
       ) : (
         /* Uniform Grid View */
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-4 sm:gap-6">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem' }}>
           {photos.map((photo) => (
             <PhotoCard
               key={photo.id}
