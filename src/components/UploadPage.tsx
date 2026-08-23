@@ -44,6 +44,7 @@ export const UploadPage: React.FC<UploadPageProps> = ({
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -65,6 +66,9 @@ export const UploadPage: React.FC<UploadPageProps> = ({
       alert("Judul dan file foto wajib diisi!");
       return;
     }
+
+    if (isUploading) return;
+    setIsUploading(true);
 
     try {
       const formData = new FormData();
@@ -96,6 +100,8 @@ export const UploadPage: React.FC<UploadPageProps> = ({
       onUploadSuccess(data.photo);
     } catch (err: any) {
       alert(err.message);
+    } finally {
+      setIsUploading(false);
     }
   };
   return (
@@ -420,10 +426,24 @@ export const UploadPage: React.FC<UploadPageProps> = ({
               <button
                 key="btn-submit"
                 type="submit"
-                className="px-6 py-2.5 rounded-full bg-[#FF4C29] text-white font-semibold text-xs hover:bg-[#334756] shadow-md flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+                disabled={isUploading}
+                className={`px-6 py-2.5 rounded-full text-white font-semibold text-xs shadow-md flex items-center gap-2 transition-all ${
+                  isUploading 
+                    ? "bg-[#334756] opacity-70 cursor-not-allowed" 
+                    : "bg-[#FF4C29] hover:bg-[#334756] transform hover:-translate-y-0.5"
+                }`}
               >
-                <Upload className="w-4 h-4 text-[#FF4C29]" />
-                <span>Publikasikan Karya</span>
+                {isUploading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    <span>Mengunggah...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 text-white" />
+                    <span>Publikasikan Karya</span>
+                  </>
+                )}
               </button>
             )}
           </div>
