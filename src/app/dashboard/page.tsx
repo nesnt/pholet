@@ -163,11 +163,10 @@ export default function Home() {
         setPhotos((prev) =>
           prev.map((p) => {
             if (p.id === photoId) {
-              const nextLiked = !p.isLiked;
               return {
                 ...p,
-                isLiked: nextLiked,
-                likesCount: data.likesCount !== undefined ? data.likesCount : (nextLiked ? p.likesCount + 1 : Math.max(0, p.likesCount - 1)),
+                isLiked: true,
+                likesCount: data.likesCount !== undefined ? data.likesCount : p.likesCount + 1,
               };
             }
             return p;
@@ -178,11 +177,10 @@ export default function Home() {
         if (activePhotoDetail && activePhotoDetail.id === photoId) {
           setActivePhotoDetail((prev) => {
             if (!prev) return null;
-            const nextLiked = !prev.isLiked;
             return {
               ...prev,
-              isLiked: nextLiked,
-              likesCount: data.likesCount !== undefined ? data.likesCount : (nextLiked ? prev.likesCount + 1 : Math.max(0, prev.likesCount - 1)),
+              isLiked: true,
+              likesCount: data.likesCount !== undefined ? data.likesCount : prev.likesCount + 1,
             };
           });
         }
