@@ -38,7 +38,18 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ photos });
+    // Ubah URL lama ke format proxy baru secara otomatis
+    const photosWithProxyUrl = photos.map(photo => {
+      if (photo.url.includes("drive.google.com/uc?id=")) {
+        const fileId = new URL(photo.url).searchParams.get("id");
+        if (fileId) {
+          return { ...photo, url: `/api/image/${fileId}` };
+        }
+      }
+      return photo;
+    });
+
+    return NextResponse.json({ photos: photosWithProxyUrl });
   } catch (error) {
     console.error("GET Photos Error:", error);
     return NextResponse.json(
@@ -108,7 +119,7 @@ export async function POST(req: Request) {
       throw new Error("Gagal mengunggah foto ke Google Drive.");
     }
 
-    const publicUrl = `https://drive.google.com/uc?id=${fileId}`;
+    const publicUrl = `/api/image/${fileId}`;
 
     // Simpan data foto ke PostgreSQL (sertakan isPrivate)
     const newPhoto = await db.photo.create({
