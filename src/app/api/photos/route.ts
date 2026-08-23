@@ -2,9 +2,8 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
-import path from "path";
-import { writeFile } from "fs/promises";
-
+import { drive } from "@/lib/gdrive";
+import { Readable } from "stream";
 // 1. GET: Ambil foto Publik + foto Privat milik user yang sedang login saja
 export async function GET() {
   try {
@@ -86,17 +85,30 @@ export async function POST(req: Request) {
       );
     }
 
-    // Simpan file fisik ke folder public/uploads
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-
     const uniqueFilename = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    const filePath = path.join(uploadDir, uniqueFilename);
 
-    await writeFile(filePath, buffer);
+    // Upload ke Google Drive
+    const stream = Readable.from(buffer);
+    const driveResponse = await drive.files.create({
+      requestBody: {
+        name: uniqueFilename,
+        parents: [process.env.GOOGLE_DRIVE_FOLDER_ID || ""],
+      },
+      media: {
+        mimeType: file.type,
+        body: stream,
+      },
+      fields: "id",
+    });
 
-    const publicUrl = `/uploads/${uniqueFilename}`;
+    const fileId = driveResponse.data.id;
+    if (!fileId) {
+      throw new Error("Gagal mengunggah foto ke Google Drive.");
+    }
+
+    const publicUrl = `https://drive.google.com/uc?id=${fileId}`;
 
     // Simpan data foto ke PostgreSQL (sertakan isPrivate)
     const newPhoto = await db.photo.create({
