@@ -47,8 +47,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="flex items-center gap-3 cursor-pointer group" 
                 onClick={() => onViewChange('feed')}
               >
-                <div className="w-11 h-11 rounded-full bg-[#334756] flex items-center justify-center border-2 border-[#2C394B]/60 shadow-inner group-hover:scale-105 transition-transform duration-300">
-                  <Camera className="w-6 h-6 text-[#FF4C29]" />
+                <div className="w-11 h-11 rounded-full bg-[#334756] flex items-center justify-center border-2 border-[#2C394B]/60 shadow-inner group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+                  <img src="/icon_pct.jpg" alt="Pholet" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <span className="font-serif-display text-2xl font-bold tracking-wider text-white block leading-none">
