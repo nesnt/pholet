@@ -34,7 +34,7 @@
     "prisma": "^7.9.1",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+  },
   "allowScripts": {
     "@google/genai": true,
     "@prisma/engines": true,
