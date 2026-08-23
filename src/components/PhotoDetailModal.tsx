@@ -45,7 +45,6 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
 }) => {
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
   const [isLightbox, setIsLightbox] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -57,12 +56,6 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
     setTimeout(() => {
       setIsLikingAnimation(false);
     }, 450);
-  };
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2000);
   };
 
   const handleDeleteClick = async () => {
@@ -302,22 +295,6 @@ a
                     </button>
                   </>
                 )}
-                <button
-                  onClick={handleCopyLink}
-                  className="px-3 py-1.5 rounded-full text-xs text-white bg-[#2C394B]/60 border border-[#334756]/30 hover:bg-[#2C394B] flex items-center gap-1.5 transition-colors"
-                >
-                  {copiedLink ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-500" />
-                      <span className="text-emerald-500 font-semibold hidden sm:inline">Tersalin!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Share2 className="w-3.5 h-3.5 text-gray-300" />
-                      <span className="hidden sm:inline">Bagikan</span>
-                    </>
-                  )}
-                </button>
               </div>
             </div>
 

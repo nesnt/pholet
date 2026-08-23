@@ -59,24 +59,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentUser, onUpdat
               <span>Akun & Profil</span>
             </div>
           </button>
-          <button className="w-full flex items-center justify-between p-3 rounded-xl text-white hover:bg-[#2C394B]/50 font-medium transition-colors">
-            <div className="flex items-center gap-3">
-              <Shield className="w-5 h-5 text-[#FF4C29]" />
-              <span>Privasi & Keamanan</span>
-            </div>
-          </button>
-          <button className="w-full flex items-center justify-between p-3 rounded-xl text-white hover:bg-[#2C394B]/50 font-medium transition-colors">
-            <div className="flex items-center gap-3">
-              <Bell className="w-5 h-5 text-[#FF4C29]" />
-              <span>Notifikasi</span>
-            </div>
-          </button>
-          <button className="w-full flex items-center justify-between p-3 rounded-xl text-white hover:bg-[#2C394B]/50 font-medium transition-colors">
-            <div className="flex items-center gap-3">
-              <Monitor className="w-5 h-5 text-[#FF4C29]" />
-              <span>Tampilan</span>
-            </div>
-          </button>
+
         </div>
 
         {/* Right Side: Content Area */}

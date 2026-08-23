@@ -20,6 +20,7 @@ import { SettingsView } from '../../components/SettingsView';
 import { BottomNav } from '../../components/BottomNav';
 import { useToast } from '../../components/Toast';
 import { Film, Camera, BookOpen, X, Image as ImageIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 export default function Home() {
   const router = useRouter();
@@ -470,9 +471,17 @@ export default function Home() {
           <div className="space-y-6">
             
             {/* Hero Section Banner Notification */}
+            <AnimatePresence>
             {showBanner && (
-              <div className="bg-[#FF4C29] text-white p-6 sm:p-8 sm:px-12 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6 -mx-4 sm:-mx-8 lg:-mx-12 -mt-6 mb-6">
-                <button 
+              <motion.div
+                initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.4, ease: 'easeInOut' }}
+                className="-mx-4 sm:-mx-8 lg:-mx-12 -mt-6 mb-6"
+              >
+                <div className="bg-[#FF4C29] text-white p-6 sm:p-8 sm:px-12 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
+                  <button 
                   onClick={() => setShowBanner(false)}
                   className="absolute top-4 right-4 p-1 text-white/70 hover:text-white transition-colors"
                   aria-label="Tutup notifikasi"
@@ -502,7 +511,9 @@ export default function Home() {
                   </button>
                 </div>
               </div>
+              </motion.div>
             )}
+            </AnimatePresence>
 
             {/* Masonry Photo Grid */}
             <PhotoGrid
