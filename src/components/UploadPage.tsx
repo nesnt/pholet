@@ -13,8 +13,7 @@ interface UploadPageProps {
 const STEPS = [
   { id: 1, title: 'Upload Foto' },
   { id: 2, title: 'Cerita Karya' },
-  { id: 3, title: 'Lokasi & Tag' },
-  { id: 4, title: 'Spesifikasi EXIF' }
+  { id: 3, title: 'Lokasi & Tag & Film' }
 ];
 
 export const UploadPage: React.FC<UploadPageProps> = ({
@@ -23,7 +22,7 @@ export const UploadPage: React.FC<UploadPageProps> = ({
   currentUser,
 }) => {
   const [step, setStep] = useState(1);
-  const handleNext = () => setStep(s => (s < 4 ? s + 1 : s));
+  const handleNext = () => setStep(s => (s < 3 ? s + 1 : s));
 
   const [title, setTitle] = useState('');
   const [caption, setCaption] = useState('');
@@ -32,18 +31,13 @@ export const UploadPage: React.FC<UploadPageProps> = ({
   const [aspectRatio, setAspectRatio] = useState<Photo['aspectRatio']>('portrait');
   const [isPrivate, setIsPrivate] = useState(false);
 
-  // EXIF fields
-  const [camera, setCamera] = useState('Yashica Electro 35 GSN');
-  const [lens, setLens] = useState('Yashinon 45mm f/1.7');
   const [filmStock, setFilmStock] = useState('Kodak Gold 200');
-  const [iso, setIso] = useState('200');
-  const [aperture, setAperture] = useState('f/2.8');
-  const [shutterSpeed, setShutterSpeed] = useState('1/250s');
   const [location, setLocation] = useState('Yogyakarta, Indonesia');
   const [tagsInput, setTagsInput] = useState('AnalogFilm, KodakGold200, Street35mm');
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -56,7 +50,7 @@ export const UploadPage: React.FC<UploadPageProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (step < 4) {
+    if (step < 3) {
       handleNext();
       return;
     }
@@ -66,6 +60,9 @@ export const UploadPage: React.FC<UploadPageProps> = ({
       return;
     }
 
+    if (isUploading) return;
+    setIsUploading(true);
+
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
@@ -73,12 +70,7 @@ export const UploadPage: React.FC<UploadPageProps> = ({
       formData.append("caption", caption);
       formData.append("category", category);
       formData.append("aspectRatio", aspectRatio);
-      formData.append("camera", camera);
-      formData.append("lens", lens);
       formData.append("filmStock", filmStock);
-      formData.append("iso", iso);
-      formData.append("aperture", aperture);
-      formData.append("shutterSpeed", shutterSpeed);
       formData.append("location", location);
       formData.append("isPrivate", isPrivate ? "true" : "false");
 
@@ -96,6 +88,8 @@ export const UploadPage: React.FC<UploadPageProps> = ({
       onUploadSuccess(data.photo);
     } catch (err: any) {
       alert(err.message);
+    } finally {
+      setIsUploading(false);
     }
   };
   return (
@@ -116,7 +110,7 @@ export const UploadPage: React.FC<UploadPageProps> = ({
             <span>Upload Karya Foto Film Baru</span>
           </h1>
           <p className="text-xs text-white/80">
-            Halaman publikasi foto analog. Isi detail kamera, rol film, dan catatan di balik jepretan Anda.
+            Halaman publikasi foto analog. Detail kamera akan dibaca secara otomatis (jika ada).
           </p>
         </div>
       </div>
@@ -307,84 +301,26 @@ export const UploadPage: React.FC<UploadPageProps> = ({
                     className="w-full bg-[#2C394B]/30 rounded-lg p-2.5 text-xs font-mono focus:ring-2 focus:ring-[#FF4C29] focus:outline-none"
                   />
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 4: EXIF Camera & Film Specs */}
-          {step === 4 && (
-            <div className="bg-[#2C394B]/30 p-4 sm:p-5 rounded-xl space-y-4 animate-fade-in">
-              <h3 className="font-semibold text-xs text-white flex items-center gap-2 border-b border-[#334756]/30 pb-2">
-                <Film className="w-4 h-4 text-[#FF4C29]" />
-                <span>Spesifikasi EXIF Kamera & Rol Film Analog</span>
-              </h3>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-                <div>
-                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Kamera</label>
-                  <input
-                    type="text"
-                    value={camera}
-                    onChange={(e) => setCamera(e.target.value)}
-                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
-                  />
-                </div>
 
                 <div>
-                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Lensa</label>
-                  <input
-                    type="text"
-                    value={lens}
-                    onChange={(e) => setLens(e.target.value)}
-                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Rol Film (Stock)</label>
+                  <label className="block font-semibold text-xs text-white mb-1.5 flex items-center gap-1.5">
+                    <Film className="w-3.5 h-3.5 text-[#FF4C29]" />
+                    <span>Rol Film (Stock)</span>
+                  </label>
                   <select
                     value={filmStock}
                     onChange={(e) => setFilmStock(e.target.value)}
-                    className="w-full bg-[#082032] rounded-lg p-2 text-xs font-mono focus:ring-1 focus:ring-[#FF4C29]"
+                    className="w-full bg-[#2C394B]/30 rounded-lg p-2.5 text-xs font-mono focus:ring-2 focus:ring-[#FF4C29] focus:outline-none"
                   >
                     {POPULAR_FILM_STOCKS.filter(s => s !== 'Semua Rol Film').map(s => (
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
                 </div>
-
-                <div>
-                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Aperture</label>
-                  <input
-                    type="text"
-                    value={aperture}
-                    onChange={(e) => setAperture(e.target.value)}
-                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">Shutter Speed</label>
-                  <input
-                    type="text"
-                    value={shutterSpeed}
-                    onChange={(e) => setShutterSpeed(e.target.value)}
-                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] text-gray-400 font-semibold block mb-1">ISO Film</label>
-                  <input
-                    type="text"
-                    value={iso}
-                    onChange={(e) => setIso(e.target.value)}
-                    className="w-full bg-[#082032] rounded-lg p-2 text-xs focus:ring-1 focus:ring-[#FF4C29]"
-                  />
-                </div>
               </div>
             </div>
           )}
+
 
           {/* Action Buttons Bar */}
           <div className="pt-6 border-t border-[#334756]/30 flex items-center justify-between gap-3 mt-8">
@@ -407,7 +343,7 @@ export const UploadPage: React.FC<UploadPageProps> = ({
               </button>
             )}
 
-            {step < 4 ? (
+            {step < 3 ? (
               <button
                 key="btn-next"
                 type="button"
@@ -420,10 +356,24 @@ export const UploadPage: React.FC<UploadPageProps> = ({
               <button
                 key="btn-submit"
                 type="submit"
-                className="px-6 py-2.5 rounded-full bg-[#FF4C29] text-white font-semibold text-xs hover:bg-[#334756] shadow-md flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+                disabled={isUploading}
+                className={`px-6 py-2.5 rounded-full text-white font-semibold text-xs shadow-md flex items-center gap-2 transition-all ${
+                  isUploading 
+                    ? "bg-[#334756] opacity-70 cursor-not-allowed" 
+                    : "bg-[#FF4C29] hover:bg-[#334756] transform hover:-translate-y-0.5"
+                }`}
               >
-                <Upload className="w-4 h-4 text-[#FF4C29]" />
-                <span>Publikasikan Karya</span>
+                {isUploading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    <span>Mengunggah...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 text-white" />
+                    <span>Publikasikan Karya</span>
+                  </>
+                )}
               </button>
             )}
           </div>

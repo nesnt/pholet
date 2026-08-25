@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import path from "path";
 import { writeFile } from "fs/promises";
+import ExifReader from "exifreader";
 
 // 1. GET: Ambil foto Publik + foto Privat milik user yang sedang login saja
 export async function GET() {
@@ -70,13 +71,8 @@ export async function POST(req: Request) {
     const aspectRatio = (formData.get("aspectRatio") as string) || "portrait";
     const isPrivate = formData.get("isPrivate") === "true"; // BACA PRIVASI
 
-    // Metadata EXIF
-    const camera = (formData.get("camera") as string) || "";
-    const lens = (formData.get("lens") as string) || "";
+    // Metadata EXIF dari form (hanya filmStock dan location yang relevan dari input manual, sisanya dari EXIF)
     const filmStock = (formData.get("filmStock") as string) || "";
-    const iso = (formData.get("iso") as string) || "";
-    const aperture = (formData.get("aperture") as string) || "";
-    const shutterSpeed = (formData.get("shutterSpeed") as string) || "";
     const location = (formData.get("location") as string) || "";
 
     if (!file || !title) {
@@ -89,6 +85,33 @@ export async function POST(req: Request) {
     // Simpan file fisik ke folder public/uploads
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    let camera = "";
+    let lens = "";
+    let iso = "";
+    let aperture = "";
+    let shutterSpeed = "";
+    
+    try {
+      const tags = ExifReader.load(buffer);
+      const make = tags['Make']?.description || "";
+      const model = tags['Model']?.description || "";
+      camera = [make, model].filter(Boolean).join(" ");
+      lens = tags['LensModel']?.description || "";
+      iso = tags['ISOSpeedRatings']?.description ? `${tags['ISOSpeedRatings'].description}` : "";
+      
+      // Parse FNumber correctly (e.g., "2.8" -> "f/2.8")
+      if (tags['FNumber']?.description) {
+        aperture = `f/${tags['FNumber'].description}`;
+      }
+      
+      // Parse ExposureTime (e.g., "1/250")
+      if (tags['ExposureTime']?.description) {
+        shutterSpeed = `${tags['ExposureTime'].description}s`;
+      }
+    } catch (err) {
+      console.log("No EXIF data found or error parsing EXIF:", err);
+    }
 
     const uniqueFilename = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
     const uploadDir = path.join(process.cwd(), "public", "uploads");

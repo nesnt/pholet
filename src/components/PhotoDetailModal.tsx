@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, 
@@ -13,7 +13,9 @@ import {
   Info,
   Check,
   Edit3,
-  Trash2
+  Trash2,
+  MessageCircle,
+  Send
 } from 'lucide-react';
 import { Photo, Photographer } from '../types';
 import { EditPhotoModal } from './EditPhotoModal';
@@ -45,9 +47,18 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
 }) => {
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
   const [isLightbox, setIsLightbox] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  const [comments, setComments] = useState(photo?.comments || []);
+  const [newCommentText, setNewCommentText] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
+  useEffect(() => {
+    if (photo) {
+      setComments(photo.comments || []);
+    }
+  }, [photo]);
 
   if (!photo) return null;
 
@@ -57,12 +68,6 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
     setTimeout(() => {
       setIsLikingAnimation(false);
     }, 450);
-  };
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2000);
   };
 
   const handleDeleteClick = async () => {
@@ -88,6 +93,34 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
     } catch (err: any) {
       alert(err.message || 'Terjadi kesalahan saat menghapus foto');
       setIsDeleting(false);
+    }
+  };
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCommentText.trim()) return;
+
+    setIsSubmittingComment(true);
+    try {
+      const res = await fetch(`/api/photos/${photo.id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: newCommentText })
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || 'Gagal menambah komentar');
+      }
+      
+      const data = await res.json();
+      setComments(prev => [data.comment, ...prev]);
+      setNewCommentText('');
+      
+      if (onAddComment) onAddComment(photo.id, newCommentText);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsSubmittingComment(false);
     }
   };
 
@@ -259,7 +292,7 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                 </div>
               )}
             </div>
-a
+
             {/* Like & Action Bar */}
             <div className="flex items-center justify-between py-2 border-y border-[#334756]/20">
               <div className="flex items-center gap-3">
@@ -302,30 +335,61 @@ a
                     </button>
                   </>
                 )}
-                <button
-                  onClick={handleCopyLink}
-                  className="px-3 py-1.5 rounded-full text-xs text-white bg-[#2C394B]/60 border border-[#334756]/30 hover:bg-[#2C394B] flex items-center gap-1.5 transition-colors"
-                >
-                  {copiedLink ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-500" />
-                      <span className="text-emerald-500 font-semibold hidden sm:inline">Tersalin!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Share2 className="w-3.5 h-3.5 text-gray-300" />
-                      <span className="hidden sm:inline">Bagikan</span>
-                    </>
-                  )}
-                </button>
               </div>
             </div>
 
+            </div>
+
+            {/* Comments Section */}
+            <div className="pt-4 mt-2 border-t border-[#334756]/20 flex-1 flex flex-col min-h-[250px]">
+              <h3 className="font-semibold text-white text-sm mb-3 flex items-center gap-2">
+                <MessageCircle className="w-4 h-4 text-[#FF4C29]" />
+                Komentar ({comments.length})
+              </h3>
+              
+              {/* Comment List */}
+              <div className="flex-1 overflow-y-auto space-y-3 mb-4 pr-1">
+                {comments.length === 0 ? (
+                  <p className="text-xs text-gray-400 text-center py-4">Belum ada komentar. Jadilah yang pertama!</p>
+                ) : (
+                  comments.map((comment: any) => (
+                    <div key={comment.id} className="flex gap-2">
+                      <img 
+                        src={comment.user?.avatar || undefined} 
+                        alt={comment.user?.name} 
+                        className="w-6 h-6 rounded-full object-cover shrink-0" 
+                      />
+                      <div className="bg-[#2C394B]/40 rounded-lg rounded-tl-none p-2 text-xs w-full">
+                        <span className="font-semibold text-white block mb-0.5">{comment.user?.name}</span>
+                        <p className="text-gray-200">{comment.text}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Comment Input */}
+              <form onSubmit={handleCommentSubmit} className="flex gap-2 relative">
+                <input
+                  type="text"
+                  value={newCommentText}
+                  onChange={(e) => setNewCommentText(e.target.value)}
+                  placeholder="Tulis komentar..."
+                  disabled={isSubmittingComment}
+                  className="w-full bg-[#2C394B]/60 border border-[#334756] rounded-full px-4 py-2 text-xs text-white focus:outline-none focus:border-[#FF4C29] disabled:opacity-50"
+                />
+                <button
+                  type="submit"
+                  disabled={!newCommentText.trim() || isSubmittingComment}
+                  className="bg-[#FF4C29] hover:bg-[#FF4C29]/80 text-white rounded-full w-8 h-8 flex items-center justify-center shrink-0 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </form>
+            </div>
+
           </div>
-
         </div>
-        </div>
-
       </motion.div>
 
       {/* Render Edit Photo Modal */}

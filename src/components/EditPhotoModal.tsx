@@ -143,7 +143,7 @@ export const EditPhotoModal: React.FC<EditPhotoModalProps> = ({
                 </label>
                 <select
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
+                  onChange={(e) => setCategory(e.target.value as "Street" | "Portrait" | "Architecture" | "Landscape" | "Abstract" | "Still Life")}
                   className="w-full px-4 py-2.5 bg-[#2C394B]/50 border border-[#334756] rounded-xl text-sm text-white focus:outline-none focus:border-[#FF4C29]"
                 >
                   <option value="Portrait">Portrait</option>
