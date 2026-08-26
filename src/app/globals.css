@@ -68,3 +68,158 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #995F2F;
 }
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #082032;
+    --bg-card: #2C394B;
+    --border-color: #334756;
+    --accent-vibrant: #FF4C29;
+    --accent-cream: #E4D6A9;
+    --accent-olive: #978F66;
+    --accent-shadow: #622B14;
+  }
+
+  body {
+    font-family: 'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #082032;
+    color: #FFFFFF;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Titan One', 'Fredoka', cursive, sans-serif;
+  }
+}
+
+/* Custom Scrollbar in #E4D6A9 & #082032 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #082032;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #978F66;
+  border-radius: 4px;
+  border: 2px solid #082032;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #E4D6A9;
+}
+
+/* Custom Fonts Utility */
+.font-editorial {
+  font-family: 'Titan One', 'Fredoka', cursive, sans-serif;
+}
+
+.font-mono-camera {
+  font-family: 'Fredoka', 'JetBrains Mono', sans-serif;
+}
+
+.font-syne {
+  font-family: 'Titan One', 'Fredoka', cursive, sans-serif;
+}
+
+.font-cartoon-title {
+  font-family: 'Titan One', 'Fredoka', cursive, sans-serif;
+}
+
+.font-formal {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.font-cartoon-body {
+  font-family: 'Fredoka', sans-serif;
+}
+
+.font-chewy {
+  font-family: 'Chewy', cursive, sans-serif;
+}
+
+.font-sniglet {
+  font-family: 'Sniglet', cursive, sans-serif;
+}
+
+/* Hard Stacked Shadow Effect #622B14 */
+.pholet-shadow-sm {
+  box-shadow: 2px 2px 0px #622B14;
+}
+
+.pholet-shadow-md {
+  box-shadow: 4px 4px 0px #622B14;
+}
+
+.pholet-shadow-lg {
+  box-shadow: 6px 6px 0px #622B14;
+}
+
+.pholet-shadow-orange {
+  box-shadow: 4px 4px 0px #FF4C29;
+}
+
+.pholet-shadow-cream {
+  box-shadow: 4px 4px 0px #E4D6A9;
+}
+
+/* Focus styles with #FF4C29 ring and #E4D6A9 ring-offset */
+.focus-pholet {
+  outline: none;
+}
+.focus-pholet:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #082032, 0 0 0 4px #FF4C29, 0 0 0 6px #E4D6A9;
+}
+
+/* Viewfinder crosshairs pattern */
+.viewfinder-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(51, 71, 86, 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(51, 71, 86, 0.25) 1px, transparent 1px);
+}
+
+.viewfinder-grid-dense {
+  background-size: 16px 16px;
+  background-image: 
+    linear-gradient(to right, rgba(51, 71, 86, 0.35) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(51, 71, 86, 0.35) 1px, transparent 1px);
+}
+
+/* Smooth Marquee animation */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes drift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes flash {
+  0% { opacity: 0; }
+  50% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+.camera-flash {
+  animation: flash 0.35s ease-out forwards;
+}
+
+
