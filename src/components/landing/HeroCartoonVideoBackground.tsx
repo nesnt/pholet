@@ -26,7 +26,7 @@ export const HeroCartoonVideoBackground: React.FC<HeroCartoonVideoBackgroundProp
           muted
           playsInline
           onLoadedData={() => setIsVideoLoaded(true)}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-right sm:object-center"
         />
       </div>
 

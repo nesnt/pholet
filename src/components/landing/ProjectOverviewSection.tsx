@@ -16,7 +16,7 @@ export const ProjectOverviewSection: React.FC = () => {
     {
       icon: Zap,
       title: 'Interaksi Sosial',
-      desc: 'Terhubung dengan sesama penggemar analog melalui fitur apresiasi dan diskusi karya secara interaktif.',
+      desc: 'Terhubung dengan sesama penggemar fotografi melalui fitur apresiasi dan diskusi karya secara interaktif.',
     },
     {
       icon: Layers,
@@ -94,14 +94,14 @@ export const ProjectOverviewSection: React.FC = () => {
                 Merawat Estetika Klasik
               </h4>
               <p className="text-xs text-gray-400 font-mono-camera mt-0.5">
-                Menyediakan ruang khusus untuk merayakan keaslian dan karakteristik unik dari setiap lembar film analog.
+                Menyediakan ruang khusus untuk berbagi keaslian dan karakteristik unik dari setiap foto.
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-6 shrink-0 font-mono-camera text-xs uppercase tracking-widest text-[#E4D6A9]">
             <div className="text-center">
-              <span className="block font-bold text-white text-lg">2024</span>
+              <span className="block font-bold text-white text-lg">2026</span>
               <span className="text-[10px] text-gray-400">Tahun Rilis</span>
             </div>
             <div className="h-8 w-px bg-[#334756]" />
@@ -111,7 +111,7 @@ export const ProjectOverviewSection: React.FC = () => {
             </div>
             <div className="h-8 w-px bg-[#334756]" />
             <div className="text-center">
-              <span className="block font-bold text-white text-lg">Analog</span>
+              <span className="block font-bold text-white text-lg">Modern</span>
               <span className="text-[10px] text-gray-400">Fotografi</span>
             </div>
           </div>

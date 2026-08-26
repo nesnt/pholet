@@ -15,10 +15,11 @@ export const HeroSection: React.FC<HeroSectionProps> = () => {
         <div className="max-w-3xl">
           <h1 className="font-cartoon-title text-3xl sm:text-5xl lg:text-6xl font-normal text-white tracking-wide uppercase leading-[1.15] drop-shadow-lg">
             <span className="block">CAPTURE &amp;</span>
-            <span className="block text-[#FF4C29] underline decoration-[#334756] decoration-wavy decoration-4">
+            <span className="block text-[#FF4C29]">
               CHERISH
             </span>
-            <span className="block whitespace-nowrap">TIMELESS MOMENTS.</span>
+            <span className="block whitespace-nowrap">TIMELESS </span>
+            <span className="block whitespace-nowrap">MOMENTS.</span>
           </h1>
         </div>
       </div>

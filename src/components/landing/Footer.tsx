@@ -86,7 +86,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar: Copyright & Back To Top */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-[#334756]/60 text-xs font-mono-camera text-gray-400">
           <div>
-            © {new Date().getFullYear()} PHOLET ANALOG PHOTOGRAPHY GALLERY. ALL RIGHTS RESERVED.
+            © {new Date().getFullYear()} PHOLET 2026.
           </div>
 
           <div className="flex items-center gap-6">

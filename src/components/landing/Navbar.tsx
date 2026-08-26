@@ -20,11 +20,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth }) => {
   return (
     <header
       id="main-header"
-      className={`sticky top-0 z-40 transition-all duration-300 ${
-        isScrolled
+      className={`sticky top-0 z-40 transition-all duration-300 ${isScrolled
           ? 'bg-[#082032]/85 backdrop-blur-md border-b border-[#334756]/60 py-3 shadow-lg'
           : 'bg-transparent -mb-[73px] border-b border-white/10 py-4'
-      }`}
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand Monogram */}
@@ -39,7 +38,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth }) => {
               pholet
             </span>
             <span className="font-mono-camera text-[10px] tracking-[0.25em] text-[#E4D6A9] uppercase drop-shadow-sm">
-              ATHLETIC CLUB OF PHOTO
+              SHARE AND KEEP MEMORY
             </span>
           </div>
         </a>
@@ -53,9 +52,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth }) => {
               playShutterSound();
               onOpenAuth?.('login');
             }}
-            className="flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl bg-[#2C394B]/80 hover:bg-[#2C394B] border border-[#334756] hover:border-[#FF4C29] text-white text-xs font-mono-camera uppercase tracking-widest font-bold transition-all shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-[#2C394B]/80 hover:bg-[#2C394B] border border-[#334756] hover:border-[#FF4C29] text-white text-[10px] sm:text-xs font-mono-camera uppercase tracking-widest font-bold transition-all shadow-sm cursor-pointer"
           >
-            <LogIn className="w-3.5 h-3.5 text-[#FF4C29]" />
+            <LogIn className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#FF4C29]" />
             <span>Login</span>
           </button>
 
@@ -66,9 +65,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth }) => {
               playShutterSound();
               onOpenAuth?.('register');
             }}
-            className="flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl bg-[#FF4C29] hover:bg-[#ff5d3c] text-white text-xs font-mono-camera uppercase tracking-widest font-bold transition-all shadow-md hover:shadow-[#FF4C29]/30 cursor-pointer"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-[#FF4C29] hover:bg-[#ff5d3c] text-white text-[10px] sm:text-xs font-mono-camera uppercase tracking-widest font-bold transition-all shadow-md hover:shadow-[#FF4C29]/30 cursor-pointer"
           >
-            <UserPlus className="w-3.5 h-3.5 text-white" />
+            <UserPlus className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
             <span>Register</span>
           </button>
         </div>
