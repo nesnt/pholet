@@ -10,6 +10,8 @@ Adapun link video untuk melihat tour aplikasi atau contoh penggunaan pada link b
 Dan untuk Link website sementara ada disini : 
 "https://pholet.vercel.app/"
 
+Lalu untuk Schema .sql bisa di akses melalui folder "prisma\migrations\20260819062357_init\migration.sql"
+
 ---
 
 ## 1. Branch `local`
