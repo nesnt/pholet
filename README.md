@@ -5,7 +5,10 @@ Pholet adalah aplikasi manajemen perpustakaan foto yang dikembangkan dengan bant
 Pada repositori proyek ini, terdapat dua *branch* utama: `local` dan `main`. Berikut adalah panduan setup untuk masing-masing *branch*.
 
 Adapun link video untuk melihat tour aplikasi atau contoh penggunaan pada link berikut ini : 
-""
+"https://drive.google.com/drive/folders/1_vj4MzyF88rZe4QYk8aj5tMf-xTX0Efv?usp=sharing"
+
+Dan untuk Link website sementara ada disini : 
+"https://pholet.vercel.app/"
 
 ---
 
