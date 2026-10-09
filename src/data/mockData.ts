@@ -5,10 +5,10 @@ export const CURRENT_USER: Photographer = {
   name: 'Baskara Putra',
   handle: '@baskara.film',
   avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
-  bio: 'Pengagum rol film 35mm & pencari cahaya senja di sudut kota. Selalu membawa Yashica Electro 35.',
+  bio: 'Pengagum fotografi 35mm & pencari cahaya senja di sudut kota. Selalu membawa Yashica Electro 35.',
   location: 'Yogyakarta, Indonesia',
   website: 'https://baskara-analog.id',
-  filmGear: ['Yashica Electro 35 GSN', 'Kodak Gold 200', 'Olympus Mju II', 'Cinestill 800T'],
+  filmGear: ['Yashica Electro 35 GSN', 'Olympus Mju II', 'Leica M6'],
   followersCount: 1420,
   followingCount: 380,
   photosCount: 28,
@@ -96,7 +96,6 @@ export const INITIAL_PHOTOS: Photo[] = [
     exif: {
       camera: 'Leica M6',
       lens: 'Summicron 35mm f/2 ASPH',
-      filmStock: 'Kodak Portra 400',
       iso: '400',
       aperture: 'f/4.0',
       shutterSpeed: '1/250s',
@@ -140,7 +139,6 @@ export const INITIAL_PHOTOS: Photo[] = [
     exif: {
       camera: 'Yashica Electro 35 GSN',
       lens: 'Yashinon 45mm f/1.7',
-      filmStock: 'Kodak Gold 200',
       iso: '200',
       aperture: 'f/2.8',
       shutterSpeed: '1/125s',
@@ -176,7 +174,6 @@ export const INITIAL_PHOTOS: Photo[] = [
     exif: {
       camera: 'Canon AE-1 Program',
       lens: 'Canon FD 50mm f/1.4 SSC',
-      filmStock: 'Cinestill 800T',
       iso: '800',
       aperture: 'f/1.8',
       shutterSpeed: '1/60s',
@@ -203,7 +200,6 @@ export const INITIAL_PHOTOS: Photo[] = [
     exif: {
       camera: 'Hasselblad 500C/M',
       lens: 'Carl Zeiss Planar 80mm f/2.8 T*',
-      filmStock: 'Fuji Pro 400H (Expired)',
       iso: '320',
       aperture: 'f/2.8',
       shutterSpeed: '1/125s',
@@ -239,7 +235,6 @@ export const INITIAL_PHOTOS: Photo[] = [
     exif: {
       camera: 'Olympus OM-1',
       lens: 'Zuiko 50mm f/1.8',
-      filmStock: 'Ilford HP5 Plus 400',
       iso: '400',
       aperture: 'f/8.0',
       shutterSpeed: '1/500s',
@@ -253,7 +248,7 @@ export const INITIAL_PHOTOS: Photo[] = [
     id: 'photo-6',
     title: 'Bangunan Antik & Mobil Tua 1970-an',
     url: 'https://images.unsplash.com/photo-1489824904134-891ab64532f1?auto=format&fit=crop&q=80&w=1000',
-    caption: 'Menemukan mobil klasik ini terparkir anggun di depan fasad arsitektur art deco. Rol film Kodak Ultramax memberikan kejenuhan warna biru & kuning yang vibrant.',
+    caption: 'Menemukan mobil klasik ini terparkir anggun di depan fasad arsitektur art deco. Memberikan kejenuhan warna biru & kuning yang vibrant.',
     photographerId: 'photographer-1',
     photographer: MOCK_PHOTOGRAPHERS[1],
     likesCount: 276,
@@ -261,12 +256,11 @@ export const INITIAL_PHOTOS: Photo[] = [
     isBookmarked: true,
     aspectRatio: 'portrait',
     category: 'Architecture',
-    tags: ['VintageCar', 'ArtDeco', 'KodakUltramax400', 'StreetClassics', 'AnalogVibes'],
+    tags: ['VintageCar', 'ArtDeco', 'StreetClassics', 'AnalogVibes'],
     createdAt: '4 hari yang lalu',
     exif: {
       camera: 'Leica M6',
       lens: 'Summicron 35mm f/2 ASPH',
-      filmStock: 'Kodak Ultramax 400',
       iso: '400',
       aperture: 'f/5.6',
       shutterSpeed: '1/250s',
@@ -288,12 +282,11 @@ export const INITIAL_PHOTOS: Photo[] = [
     isBookmarked: false,
     aspectRatio: 'landscape',
     category: 'Landscape',
-    tags: ['LandscapeFilm', 'KodakGold200', 'AnalogLandscape', 'GoldenHour', 'IndonesiaVisuals'],
+    tags: ['LandscapePhoto', 'AnalogLandscape', 'GoldenHour', 'IndonesiaVisuals'],
     createdAt: '5 hari yang lalu',
     exif: {
       camera: 'Yashica Electro 35 GSN',
       lens: 'Yashinon 45mm f/1.7',
-      filmStock: 'Kodak Gold 200',
       iso: '200',
       aperture: 'f/5.6',
       shutterSpeed: '1/500s',
@@ -315,12 +308,11 @@ export const INITIAL_PHOTOS: Photo[] = [
     isBookmarked: false,
     aspectRatio: 'square',
     category: 'Still Life',
-    tags: ['InteriorDetails', 'VintageHome', 'WarmLighting', 'Hasselblad', 'Portra160'],
+    tags: ['InteriorDetails', 'VintageHome', 'WarmLighting', 'Hasselblad'],
     createdAt: '1 minggu yang lalu',
     exif: {
       camera: 'Hasselblad 500C/M',
       lens: 'Carl Zeiss Planar 80mm f/2.8',
-      filmStock: 'Kodak Portra 160',
       iso: '160',
       aperture: 'f/4.0',
       shutterSpeed: '1/60s',
@@ -340,13 +332,3 @@ export const CATEGORIES = [
   'Landscape',
   'Still Life'
 ] as const;
-
-export const POPULAR_FILM_STOCKS = [
-  'Semua Rol Film',
-  'Kodak Portra 400',
-  'Kodak Gold 200',
-  'Cinestill 800T',
-  'Fuji Pro 400H',
-  'Ilford HP5 Plus',
-  'Kodak Ultramax 400'
-];

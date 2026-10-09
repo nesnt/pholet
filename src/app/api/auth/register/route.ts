@@ -1,17 +1,27 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
+import { validatePassword } from "@/utils/validation";
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { email, password, name } = body;
+        const email = body.email || body.username;
+        const { password, name } = body;
 
         if (!email || !password || !name) {
             return NextResponse.json(
-                { message: "mohon isi semua data input yang di minta" },
+                { message: "Mohon lengkapi semua data input yang diminta!" },
                 { status: 400 }
             )
+        }
+
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.isValid) {
+            return NextResponse.json(
+                { message: passwordValidation.errors.join(" ") },
+                { status: 400 }
+            );
         }
 
         const existingUser = await db.user.findUnique({

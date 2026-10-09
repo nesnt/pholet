@@ -3,6 +3,8 @@
 #folder or ai
 /.agents
 /.claude
+/.windsurf
+/.agent_memory
 
 # dependencies
 /node_modules
@@ -27,6 +29,9 @@
 # misc
 .DS_Store
 *.pem
+*.pdf
+/public/uploads/*
+!/public/uploads/1787810703203-DSC00100.jpg
 
 # debug
 npm-debug.log*
@@ -36,6 +41,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel

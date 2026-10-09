@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Bookmark, Camera, Film, MapPin, Share2, User } from 'lucide-react';
+import { Heart, MessageCircle, Bookmark, Camera, MapPin, Share2, User } from 'lucide-react';
 import { Photo } from '../types';
 
 interface PhotoCardProps {
@@ -102,11 +102,6 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({
               </span>
             </div>
           </button>
-
-          <span className="bg-[#082032]/80 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-md font-mono tracking-wider flex items-center gap-1 shadow-md border border-white/20">
-            <Film className="w-3 h-3 text-[#FF4C29]" />
-            {photo.exif.filmStock}
-          </span>
         </div>
 
         {/* Bottom Section: Info & Actions */}

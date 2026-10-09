@@ -17,7 +17,7 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   title: "Pholet — Galeri Foto Analog & Film",
-  description: "Mengabadikan foto yang pernah terlupakan. Komunitas galeri foto analog, berbagi catatan rol film, spesifikasi EXIF kamera, dan apresiasi antar fotografer.",
+  description: "Mengabadikan foto yang pernah terlupakan. Komunitas galeri foto analog, spesifikasi EXIF kamera, dan apresiasi antar fotografer.",
 };
 
 export default function RootLayout({

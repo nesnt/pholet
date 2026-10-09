@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Lock, Mail, User, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
 import { playShutterSound } from '../../utils/audio';
+import { validatePassword } from '../../utils/validation';
+import { PasswordRequirements } from '../PasswordRequirements';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -23,6 +25,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [error, setError] = useState('');
   const router = useRouter();
 
+  const passwordValidation = validatePassword(password);
+
   // Sync mode with prop change when modal opens
   React.useEffect(() => {
     setMode(initialMode);
@@ -36,6 +40,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     e.preventDefault();
     playShutterSound();
     setError("");
+
+    if (mode === 'register' && !passwordValidation.isValid) {
+      setError(passwordValidation.errors.join(' '));
+      return;
+    }
+
     setLoading(true);
 
     const endpoint = mode === 'login' ? "/api/auth/login" : "/api/auth/register";
@@ -221,6 +231,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     className="w-full bg-[#2C394B]/60 border border-[#334756] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF4C29] transition-colors"
                   />
                 </div>
+
+                {mode === 'register' && password.length > 0 && (
+                  <PasswordRequirements validation={passwordValidation} />
+                )}
               </div>
 
               {mode === 'login' && (

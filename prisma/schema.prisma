@@ -26,14 +26,13 @@ model Photo {
   caption      String?
   url          String    
   likesCount   Int       @default(0) 
-  isPrivate    Boolean   @default(false) // <--- KOLOM BARU: Privasi Foto (default: false / Publik)
+  isPrivate    Boolean   @default(false)
   category     String    
   aspectRatio  String   
   tags         String[]  
   
   camera       String?
   lens         String?
-  filmStock    String?
   iso          String?
   aperture     String?
   shutterSpeed String?

@@ -21,9 +21,17 @@ export async function POST(
     const body = await req.json();
     const { text } = body;
 
-    if (!text || text.trim() === "") {
+    if (typeof text !== "string" || text.trim() === "") {
       return NextResponse.json(
-        { message: "Komentar tidak boleh kosong" },
+        { message: "Komentar tidak boleh kosong!" },
+        { status: 400 }
+      );
+    }
+
+    // Batasi panjang karakter untuk mencegah DoS / Unbounded text
+    if (text.trim().length > 500) {
+      return NextResponse.json(
+        { message: "Komentar maksimal 500 karakter!" },
         { status: 400 }
       );
     }
@@ -35,8 +43,16 @@ export async function POST(
 
     if (!photo) {
       return NextResponse.json(
-        { message: "Foto tidak ditemukan" },
+        { message: "Foto tidak ditemukan!" },
         { status: 404 }
+      );
+    }
+
+    // Cek Otorisasi: Pengguna lain dilarang berinteraksi pada foto privat
+    if (photo.isPrivate && photo.userId !== userId) {
+      return NextResponse.json(
+        { message: "Tidak dapat mengomentari foto yang bersifat privat!" },
+        { status: 403 }
       );
     }
 
@@ -59,13 +75,13 @@ export async function POST(
     });
 
     return NextResponse.json(
-      { message: "Komentar berhasil ditambahkan", comment: newComment },
+      { message: "Komentar berhasil ditambahkan!", comment: newComment },
       { status: 201 }
     );
   } catch (error) {
     console.error("Add Comment Error:", error);
     return NextResponse.json(
-      { message: "Terjadi kesalahan saat menambahkan komentar" },
+      { message: "Terjadi kesalahan saat menambahkan komentar." },
       { status: 500 }
     );
   }

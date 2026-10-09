@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { Photo, LayoutMode } from '../types';
 import { PhotoCard } from './PhotoCard';
-import { CATEGORIES, POPULAR_FILM_STOCKS } from '../data/mockData';
-import { LayoutGrid, Grid3X3, Columns3, Filter, Film, Sparkles } from 'lucide-react';
+import { CATEGORIES } from '../data/mockData';
+import { Grid3X3, Columns3, Filter, Tag, X } from 'lucide-react';
 
 interface PhotoGridProps {
   photos: Photo[];
   selectedCategory: string;
   onCategorySelect: (category: string) => void;
-  selectedFilmStock: string;
-  onFilmStockSelect: (stock: string) => void;
+  searchQuery?: string;
+  onClearSearch?: () => void;
   onLikeToggle: (photoId: string) => void;
   onBookmarkToggle: (photoId: string) => void;
   onClickPhoto: (photo: Photo) => void;
@@ -21,8 +21,8 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({
   photos,
   selectedCategory,
   onCategorySelect,
-  selectedFilmStock,
-  onFilmStockSelect,
+  searchQuery,
+  onClearSearch,
   onLikeToggle,
   onBookmarkToggle,
   onClickPhoto,
@@ -100,27 +100,24 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({
           </div>
         </div>
 
-        {/* Bottom Row: Film Stock Dropdown & Count Status */}
+        {/* Bottom Row: Count Status */}
         <div className="flex items-center justify-between pt-2 border-t border-[#334756]/20 flex-wrap gap-2 text-xs">
-          <div className="flex items-center gap-2">
-            <Film className="w-4 h-4 text-[#FF4C29]" />
-            <span className="font-medium text-white">Filter Rol Film:</span>
-            <select
-              value={selectedFilmStock}
-              onChange={(e) => onFilmStockSelect(e.target.value)}
-              className="bg-[#082032] border border-[#334756]/40 rounded-lg px-2.5 py-1 text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-[#FF4C29]"
-            >
-              {POPULAR_FILM_STOCKS.map((stock) => (
-                <option key={stock} value={stock}>
-                  {stock}
-                </option>
-              ))}
-            </select>
-          </div>
-
           <div className="text-gray-400 font-medium">
             Menampilkan <span className="font-semibold text-white">{photos.length}</span> karya foto
+            {searchQuery && (
+              <span className="text-gray-300"> untuk kata kunci <strong className="text-[#FF4C29] font-mono">"{searchQuery}"</strong></span>
+            )}
           </div>
+
+          {searchQuery && onClearSearch && (
+            <button
+              onClick={onClearSearch}
+              className="flex items-center gap-1 px-2.5 py-1 bg-[#082032] hover:bg-[#334756] text-gray-300 hover:text-white rounded-lg border border-[#334756]/40 transition-colors text-[11px]"
+            >
+              <X className="w-3 h-3 text-[#FF4C29]" />
+              <span>Hapus Pencarian</span>
+            </button>
+          )}
         </div>
 
       </div>
@@ -154,17 +151,29 @@ export const PhotoGrid: React.FC<PhotoGridProps> = ({
             Tidak Ada Foto Yang Sesuai Filter
           </h3>
           <p className="text-xs text-gray-400 max-w-md mx-auto">
-            Coba ubah kata kunci pencarian, atau pilih kategori dan rol film yang berbeda untuk menemukan karya foto legendaris lainnya.
+            {searchQuery
+              ? `Tidak ditemukan foto atau tag yang cocok dengan kata kunci "${searchQuery}". Coba gunakan tag lain atau reset filter.`
+              : 'Coba ubah kata kunci pencarian atau pilih kategori yang berbeda untuk menemukan karya foto lainnya.'}
           </p>
-          <button
-            onClick={() => {
-              onCategorySelect('Semua');
-              onFilmStockSelect('Semua Rol Film');
-            }}
-            className="px-4 py-2 bg-[#FF4C29] text-white text-xs font-semibold rounded-full hover:bg-[#334756] transition-colors"
-          >
-            Reset Semua Filter
-          </button>
+          <div className="flex items-center justify-center gap-2 pt-2">
+            {searchQuery && onClearSearch && (
+              <button
+                onClick={onClearSearch}
+                className="px-4 py-2 bg-[#FF4C29] text-white text-xs font-semibold rounded-full hover:bg-[#334756] transition-colors"
+              >
+                Hapus Pencarian
+              </button>
+            )}
+            <button
+              onClick={() => {
+                onCategorySelect('Semua');
+                if (onClearSearch) onClearSearch();
+              }}
+              className="px-4 py-2 bg-[#2C394B] text-white text-xs font-semibold rounded-full hover:bg-[#334756] transition-colors border border-[#334756]"
+            >
+              Reset Semua Filter
+            </button>
+          </div>
         </div>
       ) : layoutMode === 'masonry' ? (
         /* Masonry Columns View (Pinterest style) */

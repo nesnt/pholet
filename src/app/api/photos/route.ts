@@ -5,6 +5,13 @@ import { db } from "@/lib/db";
 import { drive } from "@/lib/gdrive";
 import { Readable } from "stream";
 import ExifReader from "exifreader";
+import {
+  validatePhotoSize,
+  isAllowedPhotoExtension,
+  isAllowedPhotoMime,
+  isValidImageHeader,
+  ALLOWED_PHOTO_EXTENSIONS,
+} from "@/utils/validation";
 // 1. GET: Ambil foto Publik + foto Privat milik user yang sedang login saja
 export async function GET() {
   try {
@@ -39,15 +46,17 @@ export async function GET() {
       },
     });
 
-    // Ubah URL lama ke format proxy baru secara otomatis
+    // Ubah URL lama ke format proxy baru secara otomatis & pastikan tags adalah array
     const photosWithProxyUrl = photos.map(photo => {
+      const tags = Array.isArray(photo.tags) ? photo.tags : [];
+      let url = photo.url;
       if (photo.url.includes("drive.google.com/uc?id=")) {
         const fileId = new URL(photo.url).searchParams.get("id");
         if (fileId) {
-          return { ...photo, url: `/api/image/${fileId}` };
+          url = `/api/image/${fileId}`;
         }
       }
-      return photo;
+      return { ...photo, url, tags };
     });
 
     return NextResponse.json({ photos: photosWithProxyUrl });
@@ -81,9 +90,15 @@ export async function POST(req: Request) {
     const aspectRatio = (formData.get("aspectRatio") as string) || "portrait";
     const isPrivate = formData.get("isPrivate") === "true"; // BACA PRIVASI
 
-    // Metadata EXIF dari form (hanya filmStock dan location yang relevan dari input manual, sisanya dari EXIF)
-    const filmStock = (formData.get("filmStock") as string) || "";
+    // Metadata EXIF dari form
     const location = (formData.get("location") as string) || "";
+    const rawTags = (formData.get("tags") as string) || "";
+    const tags = rawTags
+      ? rawTags
+          .split(",")
+          .map((t) => t.trim().replace(/^#+/, ""))
+          .filter((t) => t.length > 0)
+      : [];
 
     if (!file || !title) {
       return NextResponse.json(
@@ -92,8 +107,35 @@ export async function POST(req: Request) {
       );
     }
 
+    // 1. Validasi Ukuran Berkas
+    const sizeValidation = validatePhotoSize(file.size);
+    if (!sizeValidation.isValid) {
+      return NextResponse.json(
+        { message: sizeValidation.error },
+        { status: 400 }
+      );
+    }
+
+    // 2. Validasi Ekstensi & Tipe MIME
+    if (!isAllowedPhotoExtension(file.name) || !isAllowedPhotoMime(file.type, file.name)) {
+      return NextResponse.json(
+        { 
+          message: `Format berkas '${file.name}' tidak didukung! Hanya format gambar (${ALLOWED_PHOTO_EXTENSIONS.join(", ")}) yang diperbolehkan.` 
+        },
+        { status: 400 }
+      );
+    }
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    // 3. Validasi Magic Bytes (Deteksi isi biner asli gambar)
+    if (!isValidImageHeader(buffer)) {
+      return NextResponse.json(
+        { message: "Berkas bukan gambar yang valid! Berkas dokumen (seperti PDF atau DOCX) tidak diizinkan." },
+        { status: 400 }
+      );
+    }
 
     let camera = "";
     let lens = "";
@@ -125,54 +167,69 @@ export async function POST(req: Request) {
 
     // Upload ke Google Drive
     const stream = Readable.from(buffer);
-    const driveResponse = await drive.files.create({
-      requestBody: {
-        name: uniqueFilename,
-        parents: [process.env.GOOGLE_DRIVE_FOLDER_ID || ""],
-      },
-      media: {
-        mimeType: file.type,
-        body: stream,
-      },
-      fields: "id",
-    });
+    let uploadedDriveFileId: string | null = null;
 
-    const fileId = driveResponse.data.id;
-    if (!fileId) {
-      throw new Error("Gagal mengunggah foto ke Google Drive.");
-    }
-
-    const publicUrl = `/api/image/${fileId}`;
-
-    // Simpan data foto ke PostgreSQL (sertakan isPrivate)
-    const newPhoto = await db.photo.create({
-      data: {
-        title,
-        caption,
-        url: publicUrl,
-        category,
-        aspectRatio,
-        isPrivate, // SIMPAN STATUS PRIVASI
-        camera,
-        lens,
-        filmStock,
-        iso,
-        aperture,
-        shutterSpeed,
-        location,
-        userId,
-      },
-      include: {
-        user: {
-          select: { id: true, name: true, email: true, avatar: true },
+    try {
+      const driveResponse = await drive.files.create({
+        requestBody: {
+          name: uniqueFilename,
+          parents: [process.env.GOOGLE_DRIVE_FOLDER_ID || ""],
         },
-      },
-    });
+        media: {
+          mimeType: file.type,
+          body: stream,
+        },
+        fields: "id",
+      });
 
-    return NextResponse.json(
-      { message: "Foto berhasil diunggah!", photo: newPhoto },
-      { status: 201 }
-    );
+      uploadedDriveFileId = driveResponse.data.id || null;
+      if (!uploadedDriveFileId) {
+        throw new Error("Gagal mengunggah foto ke Google Drive.");
+      }
+
+      const publicUrl = `/api/image/${uploadedDriveFileId}`;
+
+      // Simpan data foto ke PostgreSQL (sertakan isPrivate)
+      const newPhoto = await db.photo.create({
+        data: {
+          title,
+          caption,
+          url: publicUrl,
+          category,
+          aspectRatio,
+          isPrivate, // SIMPAN STATUS PRIVASI
+          tags,
+          camera,
+          lens,
+          iso,
+          aperture,
+          shutterSpeed,
+          location,
+          userId,
+        },
+        include: {
+          user: {
+            select: { id: true, name: true, email: true, avatar: true },
+          },
+        },
+      });
+
+      return NextResponse.json(
+        { message: "Foto berhasil diunggah!", photo: newPhoto },
+        { status: 201 }
+      );
+    } catch (dbOrDriveError) {
+      // Jika upload ke Google Drive sempat berhasil tetapi proses penyimpanan ke database gagal,
+      // bersihkan berkas di Google Drive agar tidak ada berkas tersisa tanpa relasi data di basis data
+      if (uploadedDriveFileId) {
+        try {
+          await drive.files.delete({ fileId: uploadedDriveFileId });
+        } catch (cleanupErr) {
+          console.error("Gagal membersihkan berkas orphan di Google Drive:", cleanupErr);
+        }
+      }
+      throw dbOrDriveError;
+    }
   } catch (error) {
     console.error("Upload Error:", error);
     return NextResponse.json(

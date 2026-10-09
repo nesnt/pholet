@@ -197,9 +197,9 @@ export const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
                       <div className="text-[#FF4C29] font-bold mt-0.5">{photo.iso}</div>
                     </div>
                     <div className="bg-[#082032] border border-[#334756] p-2.5 rounded-lg">
-                      <div className="text-[#978F66] text-[10px]">FILM / SENSOR</div>
+                      <div className="text-[#978F66] text-[10px]">FOCAL LENGTH</div>
                       <div className="text-white font-bold mt-0.5 truncate">
-                        {photo.filmStock || 'Digital Sensor'}
+                        {photo.focalLength || '-'}
                       </div>
                     </div>
                   </div>

@@ -24,7 +24,7 @@ import { motion, AnimatePresence } from 'motion/react';
 
 export default function Home() {
   const router = useRouter();
-  const { showToast } = useToast();
+  const { showToast, confirm } = useToast();
   const [isGridLoading, setIsGridLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<Photographer | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -34,7 +34,6 @@ export default function Home() {
   
   // Filters
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
-  const [selectedFilmStock, setSelectedFilmStock] = useState<string>('Semua Rol Film');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Fetch Current User
@@ -81,7 +80,7 @@ export default function Home() {
     setIsGridLoading(true);
     const timer = setTimeout(() => setIsGridLoading(false), 500);
     return () => clearTimeout(timer);
-  }, [selectedCategory, selectedFilmStock, searchQuery, currentView]);
+  }, [selectedCategory, searchQuery, currentView]);
 
     // Ambil user yang sedang login & daftar foto dari PostgreSQL saat halaman dimuat
   useEffect(() => {
@@ -128,7 +127,6 @@ export default function Home() {
             exif: {
               camera: p.camera || '-',
               lens: p.lens || '-',
-              filmStock: p.filmStock || '-',
               iso: p.iso || '-',
               aperture: p.aperture || '-',
               shutterSpeed: p.shutterSpeed || '-',
@@ -192,13 +190,23 @@ export default function Home() {
 
     // Fungsi Logout Akun
   const handleLogout = async () => {
-    if (confirm("Apakah Anda yakin ingin keluar dari akun ini?")) {
+    const isConfirmed = await confirm({
+      title: "Keluar dari Akun?",
+      message: "Apakah Anda yakin ingin keluar dari sesi akun Pholet Anda saat ini?",
+      confirmText: "Ya, Keluar",
+      cancelText: "Batal",
+      variant: "warning",
+      icon: "logout",
+    });
+
+    if (isConfirmed) {
       try {
         await fetch("/api/auth/logout", { method: "POST" });
-        // Redirect ke halaman login setelah logout
+        showToast("Sampai jumpa kembali!", "info", { title: "Berhasil Keluar" });
         window.location.href = "/login";
       } catch (err) {
         console.error("Logout Error:", err);
+        showToast("Terjadi kesalahan saat keluar", "error");
       }
     }
   };
@@ -217,28 +225,34 @@ export default function Home() {
         return false;
       }
 
-      // 3. Filter Rol Film
-      if (selectedFilmStock !== 'Semua Rol Film' && photo.exif.filmStock !== selectedFilmStock) {
-        return false;
-      }
-
-      // 4. Filter Pencarian Search Query
+      // 3. Filter Pencarian Search Query (Judul, Caption, Fotografer, Kamera, Lokasi, dan Tag Foto)
       if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
+        const query = searchQuery.toLowerCase().trim();
+        const cleanQuery = query.replace(/^#+/, '').trim();
+
         const matchesTitle = photo.title.toLowerCase().includes(query);
         const matchesCaption = photo.caption.toLowerCase().includes(query);
         const matchesPhotographer = photo.photographer.name.toLowerCase().includes(query);
         const matchesCamera = photo.exif.camera.toLowerCase().includes(query);
-        const matchesFilm = photo.exif.filmStock.toLowerCase().includes(query);
         const matchesLocation = photo.exif.location.toLowerCase().includes(query);
-        const matchesTag = photo.tags.some(t => t.toLowerCase().includes(query));
+
+        // Pencarian berdasarkan tag foto (fleksibel: mendukung pencarian dengan atau tanpa tanda '#')
+        const matchesTag = Array.isArray(photo.tags) && photo.tags.some(t => {
+          if (!t) return false;
+          const normalizedTag = t.toLowerCase().trim();
+          const cleanTag = normalizedTag.replace(/^#+/, '').trim();
+          return (
+            normalizedTag.includes(query) ||
+            (cleanQuery.length > 0 && cleanTag.includes(cleanQuery)) ||
+            (cleanQuery.length > 0 && normalizedTag.includes(cleanQuery))
+          );
+        });
 
         return (
           matchesTitle ||
           matchesCaption ||
           matchesPhotographer ||
           matchesCamera ||
-          matchesFilm ||
           matchesLocation ||
           matchesTag
         );
@@ -246,7 +260,7 @@ export default function Home() {
 
       return true;
     });
-  }, [photos, selectedCategory, selectedFilmStock, searchQuery, currentView]);
+  }, [photos, selectedCategory, searchQuery, currentView]);
 
   const handleBookmarkToggle = (photoId: string) => {
     let isNowBookmarked = false;
@@ -367,7 +381,6 @@ export default function Home() {
       exif: {
         camera: rawPhoto.camera || '-',
         lens: rawPhoto.lens || '-',
-        filmStock: rawPhoto.filmStock || '-',
         iso: rawPhoto.iso || '-',
         aperture: rawPhoto.aperture || '-',
         shutterSpeed: rawPhoto.shutterSpeed || '-',
@@ -409,6 +422,13 @@ export default function Home() {
     setSelectedPhotographerId(photographerId);
     setCurrentView('profile');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleTagClick = (tag: string) => {
+    setSearchQuery(tag);
+    setActivePhotoDetail(null);
+    setCurrentView('feed');
+    showToast(`Menampilkan foto dengan tag: #${tag}`, 'info');
   };
 
   const handleViewChange = (view: ViewMode) => {
@@ -495,7 +515,7 @@ export default function Home() {
                     "Pholet" — Mengabadikan Foto Yang Pernah Terlupakan
                   </h1>
                   <p className="text-xs sm:text-sm text-white/90 leading-relaxed font-sans">
-                    Saling memamerkan karya foto analog, berbagi catatan rol film (Portra, Gold, Cinestill), spesifikasi EXIF kamera, dan apresiasi antar fotografer.
+                    Saling memamerkan karya foto analog, spesifikasi EXIF kamera, dan apresiasi antar fotografer.
                   </p>
                 </div>
 
@@ -518,8 +538,8 @@ export default function Home() {
               photos={filteredPhotos}
               selectedCategory={selectedCategory}
               onCategorySelect={setSelectedCategory}
-              selectedFilmStock={selectedFilmStock}
-              onFilmStockSelect={setSelectedFilmStock}
+              searchQuery={searchQuery}
+              onClearSearch={() => setSearchQuery('')}
               onLikeToggle={handleLikeToggle}
               onBookmarkToggle={handleBookmarkToggle}
               onClickPhoto={(photo) => setActivePhotoDetail(photo)}
@@ -617,6 +637,7 @@ export default function Home() {
           onSelectPhotographer={handleSelectPhotographer}
           onEditSuccess={handleEditSuccess}
           onDeleteSuccess={handleDeleteSuccess}
+          onTagClick={handleTagClick}
           showEditButton={currentView === 'profile' && activePhotoDetail.photographerId === currentUser.id}
         />
       )}

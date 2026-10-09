@@ -3,6 +3,9 @@
 
 import React, { useState } from "react";
 import { X, Lock, User, KeyRound, UserCheck } from "lucide-react";
+import { useToast } from "./Toast";
+import { validatePassword } from "../utils/validation";
+import { PasswordRequirements } from "./PasswordRequirements";
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -15,6 +18,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     onClose,
     onAuthSuccess,
 }) => {
+    const { showToast } = useToast();
     const [isLoginTab, setIsLoginTab] = useState(true);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -22,17 +26,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
+    const passwordValidation = validatePassword(password);
+
     if (!isOpen) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+
+        if (!isLoginTab && !passwordValidation.isValid) {
+            const errorMsg = passwordValidation.errors.join(" ");
+            setError(errorMsg);
+            showToast(errorMsg, "warning", {
+                title: "Kata Sandi Belum Memenuhi Syarat",
+            });
+            return;
+        }
+
         setLoading(true);
 
         const endpoint = isLoginTab ? "/api/auth/login" : "/api/auth/register";
         const payload = isLoginTab
-            ? { username, password }
-            : { username, password, name };
+            ? { username, email: username, password }
+            : { username, email: username, password, name };
 
         try {
             const res = await fetch(endpoint, {
@@ -53,7 +69,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 onClose();
             } else {
                 // Jika register berhasil, otomatis pindah ke tab login
-                alert("Registrasi berhasil! Silakan login dengan akun baru Anda.");
+                showToast("Registrasi berhasil! Silakan masuk dengan akun baru Anda.", "success", {
+                    title: "Pendaftaran Berhasil",
+                });
                 setIsLoginTab(true);
                 setPassword("");
             }
@@ -167,6 +185,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                                 className="w-full pl-10 pr-4 py-2.5 bg-[#2C394B]/50 border border-[#334756] rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF4C29]"
                             />
                         </div>
+
+                        {/* Indikator Validasi Password saat Registrasi */}
+                        {!isLoginTab && password.length > 0 && (
+                            <PasswordRequirements validation={passwordValidation} />
+                        )}
                     </div>
 
                     <button

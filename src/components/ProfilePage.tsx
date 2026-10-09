@@ -156,7 +156,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           <div className="space-y-2">
             <h4 className="text-xs font-semibold text-white flex items-center gap-1.5">
               <Camera className="w-4 h-4 text-[#FF4C29]" />
-              <span>Perlengkapan Kamera & Rol Film Favorit:</span>
+              <span>Perlengkapan Kamera Favorit:</span>
             </h4>
             <div className="flex flex-wrap gap-1.5">
               {photographer.filmGear.map((gear) => (

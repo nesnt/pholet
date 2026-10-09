@@ -3,8 +3,9 @@
 
 import React, { useState } from "react";
 import { motion } from "motion/react";
-import { X, Edit3, Film } from "lucide-react";
+import { X, Edit3, Tag } from "lucide-react";
 import { Photo } from "../types";
+import { useToast } from "./Toast";
 
 interface EditPhotoModalProps {
   photo: Photo | null;
@@ -19,12 +20,16 @@ export const EditPhotoModal: React.FC<EditPhotoModalProps> = ({
   onClose,
   onEditSuccess,
 }) => {
+  const { showToast } = useToast();
   if (!isOpen || !photo) return null;
 
   const [title, setTitle] = useState(photo.title);
   const [caption, setCaption] = useState(photo.caption || "");
   const [category, setCategory] = useState(photo.category || "Street");
   const [isPrivate, setIsPrivate] = useState(photo.isPrivate || false);
+  const [tagsInput, setTagsInput] = useState(
+    Array.isArray(photo.tags) ? photo.tags.join(", ") : ""
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -34,10 +39,21 @@ export const EditPhotoModal: React.FC<EditPhotoModalProps> = ({
     setError("");
 
     try {
+      const parsedTags = tagsInput
+        .split(",")
+        .map((t) => t.trim().replace(/^#+/, ""))
+        .filter((t) => t.length > 0);
+
       const res = await fetch(`/api/photos/${photo.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, caption, category, isPrivate }),
+        body: JSON.stringify({
+          title,
+          caption,
+          category,
+          isPrivate,
+          tags: parsedTags,
+        }),
       });
 
       const data = await res.json();
@@ -52,11 +68,17 @@ export const EditPhotoModal: React.FC<EditPhotoModalProps> = ({
         caption,
         category,
         isPrivate,
+        tags: parsedTags,
       });
       onClose();
-      alert("Detail foto berhasil diperbarui!");
+      showToast("Detail foto berhasil diperbarui!", "success", {
+        title: "Karya Diperbarui",
+      });
     } catch (err: any) {
       setError(err.message);
+      showToast(err.message || "Gagal memperbarui foto", "error", {
+        title: "Gagal Mengedit",
+      });
     } finally {
       setLoading(false);
     }
@@ -88,12 +110,6 @@ export const EditPhotoModal: React.FC<EditPhotoModalProps> = ({
               alt={photo.title}
               className="max-w-full max-h-[70vh] md:max-h-[82vh] object-contain rounded-md shadow-lg"
             />
-
-            {/* Film Stock Tag Badge */}
-            <div className="absolute top-4 left-4 bg-[#FF4C29]/90 text-white text-xs px-3 py-1 rounded-full font-mono flex items-center gap-1.5 border border-[#334756]/40 shadow-md">
-              <Film className="w-3.5 h-3.5 text-white" />
-              <span>{photo.exif.filmStock}</span>
-            </div>
           </div>
 
           {/* Right Column: Edit Form */}
@@ -152,6 +168,20 @@ export const EditPhotoModal: React.FC<EditPhotoModalProps> = ({
                   <option value="Architecture">Architecture</option>
                   <option value="Abstract">Abstract</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-300 mb-1 flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-[#FF4C29]" />
+                  <span>Tag Foto (Pisahkan dengan koma)</span>
+                </label>
+                <input
+                  type="text"
+                  value={tagsInput}
+                  onChange={(e) => setTagsInput(e.target.value)}
+                  placeholder="Contoh: Street, Analog, 35mm, Sunset"
+                  className="w-full px-4 py-2.5 bg-[#2C394B]/50 border border-[#334756] rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF4C29]"
+                />
               </div>
 
               <div>

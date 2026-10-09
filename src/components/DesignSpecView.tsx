@@ -99,7 +99,7 @@ export const DesignSpecView: React.FC = () => {
               Homepage / Feed Komunitas
             </h3>
             <p className="text-xs text-gray-100/80 leading-relaxed">
-              <strong>Konsep:</strong> Galeri seni pameran independen. Tata letak Masonry memberikan ritme dinamis antara foto lanskap, potret, dan persegi. Kartu foto memiliki aksen frame tipis hangat dan badge rol film (seperti Kodak Gold/Portra) di pojok atas.
+              <strong>Konsep:</strong> Galeri seni pameran independen. Tata letak Masonry memberikan ritme dinamis antara foto lanskap, potret, dan persegi. Kartu foto memiliki aksen frame tipis hangat dan tata letak minimalis yang elegan.
             </p>
           </div>
 
@@ -119,7 +119,7 @@ export const DesignSpecView: React.FC = () => {
               Halaman Profil Fotografer
             </h3>
             <p className="text-xs text-gray-100/80 leading-relaxed">
-              <strong>Konsep:</strong> Album foto kulit buatan tangan (artisanal journal). Menampilkan banner karya terbaik, statistik apresiasi, serta badge daftar peralatan kamera & rol film favorit sang fotografer.
+              <strong>Konsep:</strong> Album foto kulit buatan tangan (artisanal journal). Menampilkan banner karya terbaik, statistik apresiasi, serta daftar peralatan kamera favorit sang fotografer.
             </p>
           </div>
         </div>
@@ -141,7 +141,7 @@ export const DesignSpecView: React.FC = () => {
               1. Navbar (Sticky Top & Bottom Nav)
             </h4>
             <p className="text-gray-100/80">
-              Header topbar untuk desktop, dan bottom navigation bar di mobile (responsif). Menyediakan fitur pencarian cepat, filter rol film, serta tombol upload foto.
+              Header topbar untuk desktop, dan bottom navigation bar di mobile (responsif). Menyediakan fitur pencarian cepat serta tombol upload foto.
             </p>
           </div>
 
@@ -161,7 +161,7 @@ export const DesignSpecView: React.FC = () => {
               3. Photo Grid (Masonry Engine)
             </h4>
             <p className="text-gray-100/80">
-              Grid foto adaptif yang menyesuaikan tinggi gambar tanpa crop (1 kolom mobile, 2 kolom tablet, 3-4 kolom desktop) lengkap dengan filter kategori & rol film.
+              Grid foto adaptif yang menyesuaikan tinggi gambar tanpa crop (1 kolom mobile, 2 kolom tablet, 3-4 kolom desktop) lengkap dengan filter kategori.
             </p>
           </div>
 
@@ -246,7 +246,7 @@ export const DesignSpecView: React.FC = () => {
             <div className="p-3 bg-[#082032] space-y-1">
               <span className="font-bold text-white block">Peran UI:</span>
               <p className="text-[11px] text-gray-100/80">
-                Elemen Sekunder, Badge Rol Film, Hover Accent, Icon Highlights.
+                Elemen Sekunder, Card Border, Hover Accent, Icon Highlights.
               </p>
             </div>
           </div>

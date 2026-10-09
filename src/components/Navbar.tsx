@@ -71,7 +71,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  placeholder="Cari foto, kamera, rol film (Kodak Portra 400), lokasi, tag..."
+                  placeholder="Cari foto, kamera, lokasi, tag..."
                   className="w-full pl-11 pr-10 py-2.5 bg-[#082032]/50 border border-[#334756]/40 rounded-full text-sm text-white placeholder-[#978F66] focus:outline-none focus:ring-2 focus:ring-[#E4D6A9] focus:border-transparent transition-all shadow-inner"
                 />
                 {searchQuery && (
@@ -143,7 +143,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Cari foto, kamera, rol film..."
+                placeholder="Cari foto, tag, kamera, lokasi..."
                 className="w-full pl-9 pr-3 py-1.5 bg-[#082032]/50 border border-[#334756]/40 rounded-full text-xs text-white placeholder-[#978F66] focus:outline-none focus:ring-1 focus:ring-[#E4D6A9]"
               />
             </div>

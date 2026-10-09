@@ -5,18 +5,34 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Camera, KeyRound, Mail, UserCheck } from "lucide-react";
+import { useToast } from "@/components/Toast";
+import { validatePassword } from "@/utils/validation";
+import { PasswordRequirements } from "@/components/PasswordRequirements";
 
 export default function RegisterPage() {
     const router = useRouter();
+    const { showToast } = useToast();
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
+    const passwordValidation = validatePassword(password);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+
+        if (!passwordValidation.isValid) {
+            const errorMsg = passwordValidation.errors.join(" ");
+            setError(errorMsg);
+            showToast(errorMsg, "warning", {
+                title: "Kata Sandi Belum Sesuai",
+            });
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -32,10 +48,17 @@ export default function RegisterPage() {
                 throw new Error(data.message || "Registrasi gagal!");
             }
 
-            alert("Registrasi berhasil! Silakan login.");
-            router.push("/login");
+            showToast("Registrasi berhasil! Silakan masuk dengan akun baru Anda.", "success", {
+                title: "Akun Berhasil Dibuat",
+            });
+            setTimeout(() => {
+                router.push("/login");
+            }, 1000);
         } catch (err: any) {
             setError(err.message);
+            showToast(err.message || "Registrasi gagal", "error", {
+                title: "Pendaftaran Gagal",
+            });
         } finally {
             setLoading(false);
         }
@@ -115,6 +138,11 @@ export default function RegisterPage() {
                                     className="w-full pl-10 pr-4 py-2.5 bg-[#082032]/60 border border-[#334756] rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#FF4C29]"
                                 />
                             </div>
+
+                            {/* Indikator Persyaratan Password */}
+                            {password.length > 0 && (
+                                <PasswordRequirements validation={passwordValidation} />
+                            )}
                         </div>
 
                         <button

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { drive } from "@/lib/gdrive";
+import { Readable } from "stream";
 
 export async function GET(
   req: Request,
@@ -8,26 +9,29 @@ export async function GET(
   try {
     const { id } = await params;
 
-    // Fetch file stream from Google Drive
+    // Validasi format ID Google Drive untuk mencegah parameter injection / malformed query
+    if (!id || !/^[a-zA-Z0-9_-]{10,120}$/.test(id)) {
+      return new NextResponse("Identifier berkas tidak valid", { status: 400 });
+    }
+
+    // Ambil streaming berkas dari Google Drive
     const response = await drive.files.get(
       { fileId: id, alt: "media" },
       { responseType: "stream" }
     );
 
-    // Convert Node.js stream to Web ReadableStream
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { Readable } = require("stream");
-    const webStream = Readable.toWeb(response.data);
+    // Konversi Node stream ke Web ReadableStream
+    const webStream = Readable.toWeb(response.data as any);
 
-    // Set cache control for 1 year (31536000 seconds)
-    return new NextResponse(webStream, {
+    // Header proteksi & cache 1 tahun
+    return new NextResponse(webStream as unknown as BodyInit, {
       headers: {
         "Content-Type": response.headers["content-type"] || "image/jpeg",
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     });
-  } catch (error) {
-    console.error("Image proxy error:", error);
-    return new NextResponse("Error fetching image", { status: 500 });
+  } catch (error: any) {
+    console.error("Image proxy error:", error?.message || error);
+    return new NextResponse("Gambar tidak ditemukan atau gagal dimuat", { status: 404 });
   }
 }

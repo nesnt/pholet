@@ -17,7 +17,7 @@ export interface Photographer {
 export interface EXIFInfo {
   camera: string;
   lens: string;
-  filmStock: string;
+  filmStock?: string;
   iso: string;
   aperture: string;
   shutterSpeed: string;

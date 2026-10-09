@@ -4,7 +4,6 @@ import {
   X, 
   Heart, 
   Camera, 
-  Film, 
   MapPin, 
   Calendar, 
   Share2, 
@@ -15,10 +14,12 @@ import {
   Edit3,
   Trash2,
   MessageCircle,
-  Send
+  Send,
+  Tag
 } from 'lucide-react';
 import { Photo, Photographer } from '../types';
 import { EditPhotoModal } from './EditPhotoModal';
+import { useToast } from './Toast';
 
 interface PhotoDetailModalProps {
   photo: Photo | null;
@@ -30,6 +31,7 @@ interface PhotoDetailModalProps {
   onSelectPhotographer: (photographerId: string) => void;
   onEditSuccess?: (updatedPhoto: Photo) => void;
   onDeleteSuccess?: (photoId: string) => void;
+  onTagClick?: (tag: string) => void;
   showEditButton?: boolean;
 }
 
@@ -43,8 +45,10 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
   onSelectPhotographer,
   onEditSuccess,
   onDeleteSuccess,
+  onTagClick,
   showEditButton = false,
 }) => {
+  const { showToast, confirm } = useToast();
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
   const [isLightbox, setIsLightbox] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -71,7 +75,16 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
   };
 
   const handleDeleteClick = async () => {
-    if (!window.confirm('Apakah Anda yakin ingin menghapus karya foto ini? Tindakan ini tidak dapat dibatalkan.')) {
+    const isConfirmed = await confirm({
+      title: 'Hapus Karya Foto?',
+      message: 'Apakah Anda yakin ingin menghapus karya foto ini? Tindakan ini permanen dan tidak dapat dibatalkan.',
+      confirmText: 'Hapus Karya',
+      cancelText: 'Batal',
+      variant: 'danger',
+      icon: 'trash',
+    });
+
+    if (!isConfirmed) {
       return;
     }
     
@@ -85,13 +98,15 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
         throw new Error(data.message || 'Gagal menghapus foto');
       }
       
-      alert('Foto berhasil dihapus!');
+      showToast('Karya foto berhasil dihapus', 'success', { title: 'Foto Dihapus' });
       if (onDeleteSuccess) {
         onDeleteSuccess(photo.id);
       }
       onClose();
     } catch (err: any) {
-      alert(err.message || 'Terjadi kesalahan saat menghapus foto');
+      showToast(err.message || 'Terjadi kesalahan saat menghapus foto', 'error', {
+        title: 'Gagal Menghapus',
+      });
       setIsDeleting(false);
     }
   };
@@ -117,8 +132,11 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
       setNewCommentText('');
       
       if (onAddComment) onAddComment(photo.id, newCommentText);
+      showToast('Komentar berhasil ditambahkan', 'success', { title: 'Komentar Terkirim' });
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message || 'Gagal mengirim komentar', 'error', {
+        title: 'Komentar Gagal',
+      });
     } finally {
       setIsSubmittingComment(false);
     }
@@ -190,12 +208,6 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
           >
             <Maximize2 className="w-4 h-4 text-white" />
           </button>
-
-          {/* Film Stock Tag Badge */}
-          <div className="absolute top-4 left-4 bg-[#FF4C29]/90 text-white text-xs px-3 py-1 rounded-full font-mono flex items-center gap-1.5 border border-[#334756]/40 shadow-md">
-            <Film className="w-3.5 h-3.5 text-white" />
-            <span>{photo.exif.filmStock}</span>
-          </div>
         </div>
 
         {/* Right Column: Photo Details, EXIF & Comments */}
@@ -237,16 +249,49 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                 {photo.caption}
               </p>
 
-              {/* Tags */}
-              <div className="flex flex-wrap gap-1.5 mt-3">
-                {photo.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[10px] text-white bg-[#2C394B]/60 border border-[#334756]/30 px-2 py-0.5 rounded-full font-mono"
-                  >
-                    #{tag}
-                  </span>
-                ))}
+              {/* Tags Section */}
+              <div className="pt-2">
+                <div className="flex items-center gap-1.5 mb-2 text-xs font-semibold text-gray-300">
+                  <Tag className="w-3.5 h-3.5 text-[#FF4C29]" />
+                  <span>Tag Foto</span>
+                  {Array.isArray(photo.tags) && photo.tags.length > 0 && (
+                    <span className="text-[10px] text-[#FF4C29] font-mono font-normal">
+                      ({photo.tags.length})
+                    </span>
+                  )}
+                </div>
+
+                {Array.isArray(photo.tags) && photo.tags.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {photo.tags.map((tag, idx) => {
+                      const cleanTag = (tag || '').replace(/^#+/, '').trim();
+                      if (!cleanTag) return null;
+                      return (
+                        <button
+                          key={`${cleanTag}-${idx}`}
+                          type="button"
+                          onClick={() => {
+                            if (onTagClick) {
+                              onTagClick(cleanTag);
+                              onClose();
+                            }
+                          }}
+                          className={`text-xs text-white bg-[#2C394B]/80 hover:bg-[#FF4C29] border border-[#334756]/60 hover:border-[#FF4C29] px-2.5 py-1 rounded-full font-mono transition-all flex items-center gap-1 shadow-sm group ${
+                            onTagClick ? 'cursor-pointer hover:scale-105 active:scale-95' : ''
+                          }`}
+                          title={onTagClick ? `Cari foto dengan tag #${cleanTag}` : undefined}
+                        >
+                          <span className="text-[#FF4C29] group-hover:text-white font-bold">#</span>
+                          <span>{cleanTag}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-400 italic font-mono flex items-center gap-1.5 bg-[#2C394B]/20 px-3 py-1.5 rounded-lg border border-[#334756]/20">
+                    <span>Belum ada tag untuk foto ini</span>
+                  </p>
+                )}
               </div>
             </div>
 
@@ -267,9 +312,8 @@ export const PhotoDetailModal: React.FC<PhotoDetailModalProps> = ({
                   <Camera className="w-3.5 h-3.5 text-[#FF4C29] shrink-0" />
                   <span className="font-medium text-[11px] truncate">{photo.exif.camera}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Film className="w-3.5 h-3.5 text-[#FF4C29] shrink-0" />
-                  <span className="font-medium text-[11px] truncate">{photo.exif.filmStock}</span>
+                <div className="text-[11px] text-white">
+                  <span className="text-gray-400">Fokal: </span>{photo.exif.focalLength || '-'}
                 </div>
                 <div className="text-[11px] text-white">
                   <span className="text-gray-400">Lensa: </span>{photo.exif.lens}
